@@ -12,6 +12,7 @@
   "license": "MIT",
   "main": "lib/index.js",
   "module": "es/index.js",
+  "sideEffects": false,
   "scripts": {
     "compile": "rimraf es lib && cross-env BABEL_ENV=es babel src -d es && cross-env BABEL_ENV=node babel src -d lib",
     "lint": "eslint src test",
