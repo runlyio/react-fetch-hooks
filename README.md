@@ -37,7 +37,7 @@ import { useLazyFetch } from "react-fetch-hooks";
 
 const BananaEditor = ({ color }) => {
 	const { isFetching: isSaving, error, fetch: saveBanana } =
-		useFetch({
+		useLazyFetch({
 			url: "https://api.example.com/bananas/",
 			method: "POST",
 			body: JSON.stringify({ color })
@@ -67,7 +67,7 @@ import { useLazyFetch } from "react-fetch-hooks";
 
 const BananaEditor = ({ color }) => {
 	const { isFetching: isSaving, isFetched: isSaved, fetch: saveBanana } =
-		useFetch({
+		useLazyFetch({
 			url: "https://api.example.com/bananas/",
 			method: "POST",
 			body: JSON.stringify({ color }),
