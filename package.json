@@ -1,0 +1,56 @@
+{
+  "name": "react-fetch-hooks",
+  "version": "0.1.0",
+  "description": "A set of react hooks to work with the fetch API and gracefully parse & deal with HTTP errors",
+  "keywords": [
+    "react",
+    "hooks",
+    "fetch",
+    "lazy"
+  ],
+  "author": "Archon Information Systems",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "scripts": {
+    "compile": "rimraf lib && babel src -d lib",
+    "lint": "eslint src test --ext=js,jsx",
+    "test": "mocha --recursive --require test/babel-register",
+    "test-teamcity": "yarn test --reporter mocha-teamcity-reporter"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/civicsource/react-fetch-hooks.git"
+  },
+  "dependencies": {
+    "lodash": "4.x"
+  },
+  "peerDependencies": {
+    "react": ">= 16.8 < 17"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.4.0",
+    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/plugin-proposal-export-default-from": "^7.2.0",
+    "@babel/plugin-proposal-export-namespace-from": "^7.2.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
+    "@babel/plugin-proposal-optional-catch-binding": "^7.2.0",
+    "@babel/preset-env": "^7.4.1",
+    "@babel/register": "^7.4.0",
+    "babel-plugin-lodash": "^3.3.4",
+    "chai": "^4.2.0",
+    "cross-env": "^5.2.0",
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.11.2",
+    "eslint": "^5.15.3",
+    "eslint-config-civicsource": "^11.1.0",
+    "jsdom": "^13.1.0",
+    "mocha": "^6.0.2",
+    "mocha-teamcity-reporter": "^2.5.2",
+    "prettier": "^1.16.4",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
+    "react-test-renderer": "^16.8.4",
+    "rimraf": "^2.6.3"
+  }
+}
