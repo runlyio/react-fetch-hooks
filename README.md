@@ -90,7 +90,7 @@ This will clear the `isSaving` & `isSaved` flags 3 seconds after the `POST` fini
 
 ### Conditional Fetching
 
-Since you [shouldn't wrap your hooks in conditionals](https://reactjs.org/docs/hooks-rules.html), if you want to conditionally fetch, you can passa `null` or empty URL to the hook which will tell it not to do anything:
+Since you [shouldn't wrap your hooks in conditionals](https://reactjs.org/docs/hooks-rules.html), if you want to conditionally fetch, you can pass a `null` or empty URL to the hook which will tell it not to do anything:
 
 ```js
 import React from "react";
