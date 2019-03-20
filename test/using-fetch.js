@@ -634,7 +634,7 @@ describe("Using fetch hook", function() {
 			({ id }) =>
 				useFetch({
 					url: `http://example.com/api/bananas/${id}`,
-					reset: 100
+					resetDelay: 100
 				}),
 			wrapper => wrapper.setProps({ id: 420 })
 		);
@@ -646,10 +646,175 @@ describe("Using fetch hook", function() {
 						url: `http://example.com/api/bananas/`,
 						method: "POST",
 						body: JSON.stringify({ id }),
-						reset: 100
+						resetDelay: 100
 					}),
 				(wrapper, { fetch }) => fetch()
 			);
+		});
+	});
+
+	describe("when rendering a component with a refresh interval", function() {
+		function behavesLikeTestingRefresh(useHook, triggerFetch) {
+			beforeEach(function(done) {
+				const Hooked = props => {
+					this.result = useHook(props);
+					return <span>{props.id}</span>;
+				};
+
+				this.wrapper = mount(<Hooked id={69} />);
+
+				if (this.result.fetch) this.result.fetch();
+
+				setTimeout(done, 10);
+			});
+
+			afterEach(function() {
+				if (this.wrapper) {
+					this.wrapper.unmount();
+				}
+			});
+
+			describe("with a successful server response", function() {
+				beforeEach(function(done) {
+					this.requests.pop().resolve({
+						status: 200,
+						statusText: "OK",
+						json: async () => ({ color: "Yellow" })
+					});
+
+					setTimeout(done, 10);
+				});
+
+				it("should return result", function() {
+					expect(this.result).to.be.ok;
+
+					const { isFetching, isFetched, error, data } = this.result;
+
+					expect(isFetching).to.be.false;
+					expect(isFetched).to.be.true;
+					expect(error).to.not.be.ok;
+
+					expect(data).to.deep.equal({ color: "Yellow" });
+				});
+
+				describe("and then waiting the refresh threshold time", function() {
+					beforeEach(function(done) {
+						setTimeout(done, 100);
+					});
+
+					it("should mark data as loading without clearing data", function() {
+						expect(this.result).to.be.ok;
+
+						const { isFetching, isFetched, error, data } = this.result;
+
+						expect(isFetching).to.be.true;
+						expect(isFetched).to.be.true;
+						expect(error).to.not.be.ok;
+
+						expect(data).to.deep.equal({ color: "Yellow" });
+					});
+				});
+
+				describe("and then triggering another fetch before the refresh threshold time", function() {
+					beforeEach(function(done) {
+						setTimeout(() => {
+							triggerFetch(this.wrapper, this.result);
+							setTimeout(done, 10);
+						}, 30);
+					});
+
+					it("should mark status as refetching", function() {
+						expect(this.result).to.be.ok;
+
+						const { isFetching, isFetched, error, data } = this.result;
+
+						expect(isFetching).to.be.true;
+						expect(isFetched).to.be.true;
+						expect(error).to.not.be.ok;
+
+						expect(data).to.deep.equal({ color: "Yellow" });
+					});
+
+					describe("and then waiting enough time for the original refresh", function() {
+						beforeEach(function(done) {
+							this.requests.pop().resolve({
+								status: 200,
+								statusText: "OK",
+								json: async () => ({ color: "Brown" })
+							});
+
+							setTimeout(done, 80);
+						});
+
+						it("should not refresh data", function() {
+							expect(this.result).to.be.ok;
+
+							const { isFetching, isFetched, error, data } = this.result;
+
+							expect(isFetching).to.be.false;
+							expect(isFetched).to.be.true;
+							expect(error).to.not.be.ok;
+
+							expect(data).to.deep.equal({ color: "Brown" });
+						});
+
+						describe("and then waiting for the next refresh time", function() {
+							beforeEach(function(done) {
+								setTimeout(done, 110);
+							});
+
+							it("should refresh the data", function() {
+								expect(this.result).to.be.ok;
+
+								const { isFetching, isFetched, error, data } = this.result;
+
+								expect(isFetching).to.be.true;
+								expect(isFetched).to.be.true;
+								expect(error).to.not.be.ok;
+
+								expect(data).to.deep.equal({ color: "Brown" });
+							});
+						});
+					});
+				});
+			});
+		}
+
+		behavesLikeTestingRefresh(
+			({ id }) =>
+				useFetch({
+					url: `http://example.com/api/bananas/${id}`,
+					refreshInterval: 100
+				}),
+			wrapper => wrapper.setProps({ id: 420 })
+		);
+
+		describe("and a lazy function", function() {
+			behavesLikeTestingRefresh(
+				({ id }) =>
+					useLazyFetch({
+						url: `http://example.com/api/bananas/`,
+						method: "POST",
+						body: JSON.stringify({ id }),
+						refreshInterval: 100
+					}),
+				(wrapper, { fetch }) => fetch()
+			);
+		});
+	});
+
+	describe("when rendering a component with a refresh interval and a reset delay", function() {
+		it("should throw an error", function() {
+			const Hooked = props => {
+				this.result = useFetch({
+					url: "https://api.example.com/bananas/",
+					refreshInterval: 10,
+					resetDelay: 30
+				});
+				return <span>{props.id}</span>;
+			};
+
+			expect(() => mount(<Hooked id={69} />)).to.throw();
 		});
 	});
 

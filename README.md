@@ -57,9 +57,30 @@ const BananaEditor = ({ color }) => {
 
 This will not invoke the fetch until the button is clicked.
 
+### Polling on an Interval
+
+You can pass a `refreshInterval` parameter to any of the fetch hooks to refresh the data (do the fetch again) after a certain amount of time has passed. This could be useful to poll the server changes on a set interval:
+
+```js
+import React from "react";
+import { useFetch } from "react-fetch-hooks";
+
+const MyBanana = ({ id }) => {
+	const { data: banana } = useFetch({
+		url: `https://api.example.com/bananas/${id}`,
+		refreshInterval: 10000
+	});
+
+	if(!banana) return null;
+	return <span>My banana is {banana.color}!</span>;
+};
+```
+
+This will make a `GET` request and update the data from the server every 10 seconds.
+
 ### Reset Fetched Data
 
-You can pass a `reset` parameter to any of the fetch hooks to reset the data after a certain amount of time has passed. This could be useful to clear the "saved" flag after a short amount of time:
+You can pass a `resetDelay` parameter to any of the fetch hooks to reset the data after a certain amount of time has passed. This could be useful to clear the "saved" flag after a short amount of time:
 
 ```js
 import React from "react";
@@ -71,7 +92,7 @@ const BananaEditor = ({ color }) => {
 			url: "https://api.example.com/bananas/",
 			method: "POST",
 			body: JSON.stringify({ color }),
-			reset: 3000
+			resetDelay: 3000
 		});
 
 	if (isSaving) {
