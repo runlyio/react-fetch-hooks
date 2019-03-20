@@ -7,12 +7,15 @@
 		["@babel/proposal-object-rest-spread", { "useBuiltIns": true }]
 	],
 	"env": {
+		"es": {
+			"presets": ["@babel/react"]
+		},
 		"node": {
 			"presets": [["@babel/env", {
 				"targets": {
-				  "node": "8"
+				  "node": "current"
 				}
-			}]]
+			}], "@babel/react"]
 		}
 	}
 }
