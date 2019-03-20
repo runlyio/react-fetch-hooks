@@ -13,141 +13,123 @@ describe("Using fetch hook", function() {
 	behavesLikeBrowser();
 
 	describe("when rendering a component with just a URL", function() {
-		beforeEach(function() {
+		beforeEach(function(done) {
 			const Hooked = () => {
 				this.result = useFetch("http://example.com/api/bananas/");
 				return <span>Hello</span>;
 			};
 
 			this.wrapper = mount(<Hooked />);
+
+			setTimeout(done, 10);
 		});
 
-		it("should return initial empty result to the component", function() {
+		it("should make a fetch API request", function() {
+			expect(this.requests.length).to.equal(1);
+			expect(this.requests[0].url).to.equal("http://example.com/api/bananas/");
+		});
+
+		it("should set default accept & content headers", function() {
+			const req = this.requests[0];
+
+			expect(req.headers).to.be.ok;
+			expect(Object.keys(req.headers)).to.have.lengthOf(2);
+
+			expect(req.headers["Accept"]).to.equal("application/json");
+			expect(req.headers["Content-Type"]).to.equal("application/json");
+		});
+
+		it("should indicate the data is fetching", function() {
 			expect(this.result).to.be.ok;
 
 			const { isFetching, isFetched, error, data } = this.result;
 
-			expect(isFetching).to.be.false;
+			expect(isFetching).to.be.true;
 			expect(isFetched).to.be.false;
 			expect(error).to.not.be.ok;
 
 			expect(data).to.not.be.ok;
 		});
 
-		describe("and then waiting for another render", function() {
+		describe("with a successful server response", function() {
 			beforeEach(function(done) {
+				this.requests.pop().resolve({
+					status: 200,
+					statusText: "OK",
+					json: async () => ["ripe banana", "green banana"]
+				});
+
 				setTimeout(done, 10);
 			});
 
-			it("should make a fetch API request", function() {
-				expect(this.requests.length).to.equal(1);
-				expect(this.requests[0].url).to.equal(
-					"http://example.com/api/bananas/"
-				);
-			});
-
-			it("should set default accept & content headers", function() {
-				const req = this.requests[0];
-
-				expect(req.headers).to.be.ok;
-				expect(Object.keys(req.headers)).to.have.lengthOf(2);
-
-				expect(req.headers["Accept"]).to.equal("application/json");
-				expect(req.headers["Content-Type"]).to.equal("application/json");
-			});
-
-			it("should indicate the data is fetching", function() {
+			it("should return results as loaded", function() {
 				expect(this.result).to.be.ok;
 
 				const { isFetching, isFetched, error, data } = this.result;
 
-				expect(isFetching).to.be.true;
-				expect(isFetched).to.be.false;
+				expect(isFetching).to.be.false;
+				expect(isFetched).to.be.true;
 				expect(error).to.not.be.ok;
+
+				expect(data).to.be.ok;
+				expect(data).to.have.lengthOf(2);
+				expect(data[0]).to.equal("ripe banana");
+				expect(data[1]).to.equal("green banana");
+			});
+
+			describe("and then setting setting arbitrary props on the component", function() {
+				beforeEach(function(done) {
+					this.wrapper.setProps({ hello: "world" });
+
+					setTimeout(done, 10);
+				});
+
+				it("should not make another fetch API request", function() {
+					expect(this.requests.length).to.equal(0);
+				});
+			});
+		});
+
+		describe("with a failure server response", function() {
+			beforeEach(function(done) {
+				this.requests.pop().resolve({
+					status: 500,
+					statusText: "OK",
+					json: async () => ({
+						message: "Not today, buddy"
+					})
+				});
+
+				setTimeout(done, 10);
+			});
+
+			it("should return results as errored", function() {
+				expect(this.result).to.be.ok;
+
+				const { isFetching, isFetched, error, data } = this.result;
+
+				expect(isFetching).to.be.false;
+				expect(isFetched).to.be.false;
+
+				expect(error).to.be.ok;
+				expect(error).to.be.an("error");
+
+				expect(error.message).to.equal("Not today, buddy");
+				expect(error.response).to.be.ok;
+				expect(error.response.status).to.equal(500);
 
 				expect(data).to.not.be.ok;
 			});
 
-			describe("with a successful server response", function() {
+			describe("and then setting setting arbitrary props on the component", function() {
 				beforeEach(function(done) {
-					this.requests.pop().resolve({
-						status: 200,
-						statusText: "OK",
-						json: async () => ["ripe banana", "green banana"]
-					});
+					this.wrapper.setProps({ hello: "world" });
 
 					setTimeout(done, 10);
 				});
 
-				it("should return results as loaded", function() {
-					expect(this.result).to.be.ok;
-
-					const { isFetching, isFetched, error, data } = this.result;
-
-					expect(isFetching).to.be.false;
-					expect(isFetched).to.be.true;
-					expect(error).to.not.be.ok;
-
-					expect(data).to.be.ok;
-					expect(data).to.have.lengthOf(2);
-					expect(data[0]).to.equal("ripe banana");
-					expect(data[1]).to.equal("green banana");
-				});
-
-				describe("and then setting setting arbitrary props on the component", function() {
-					beforeEach(function(done) {
-						this.wrapper.setProps({ hello: "world" });
-
-						setTimeout(done, 10);
-					});
-
-					it("should not make another fetch API request", function() {
-						expect(this.requests.length).to.equal(0);
-					});
-				});
-			});
-
-			describe("with a failure server response", function() {
-				beforeEach(function(done) {
-					this.requests.pop().resolve({
-						status: 500,
-						statusText: "OK",
-						json: async () => ({
-							message: "Not today, buddy"
-						})
-					});
-
-					setTimeout(done, 10);
-				});
-
-				it("should return results as errored", function() {
-					expect(this.result).to.be.ok;
-
-					const { isFetching, isFetched, error, data } = this.result;
-
-					expect(isFetching).to.be.false;
-					expect(isFetched).to.be.false;
-
-					expect(error).to.be.ok;
-					expect(error).to.be.an("error");
-
-					expect(error.message).to.equal("Not today, buddy");
-					expect(error.response).to.be.ok;
-					expect(error.response.status).to.equal(500);
-
-					expect(data).to.not.be.ok;
-				});
-
-				describe("and then setting setting arbitrary props on the component", function() {
-					beforeEach(function(done) {
-						this.wrapper.setProps({ hello: "world" });
-
-						setTimeout(done, 10);
-					});
-
-					it("should not make another fetch API request", function() {
-						expect(this.requests.length).to.equal(0);
-					});
+				it("should not make another fetch API request", function() {
+					expect(this.requests.length).to.equal(0);
 				});
 			});
 		});
