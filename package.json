@@ -1,6 +1,6 @@
 {
   "name": "react-fetch-hooks",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A set of react hooks to work with the fetch API and gracefully parse & deal with HTTP errors",
   "keywords": [
     "react",
@@ -11,10 +11,11 @@
   "author": "Archon Information Systems",
   "license": "MIT",
   "main": "lib/index.js",
+  "module": "es/index.js",
   "scripts": {
-    "compile": "rimraf lib && babel src -d lib",
+    "compile": "rimraf es lib && cross-env BABEL_ENV=es babel src -d es && cross-env BABEL_ENV=node babel src -d lib",
     "lint": "eslint src test",
-    "test": "mocha --recursive --require test/babel-register",
+    "test": "cross-env BABEL_ENV=node mocha --recursive --require test/babel-register",
     "test-teamcity": "yarn test --reporter mocha-teamcity-reporter"
   },
   "repository": {
@@ -52,5 +53,8 @@
     "react-dom": "^16.8.4",
     "react-test-renderer": "^16.8.4",
     "rimraf": "^2.6.3"
+  },
+  "engines": {
+    "node": ">= 8.0"
   }
 }
