@@ -13,7 +13,7 @@
   "main": "lib/index.js",
   "scripts": {
     "compile": "rimraf lib && babel src -d lib",
-    "lint": "eslint src test --ext=js,jsx",
+    "lint": "eslint src test",
     "test": "mocha --recursive --require test/babel-register",
     "test-teamcity": "yarn test --reporter mocha-teamcity-reporter"
   },
