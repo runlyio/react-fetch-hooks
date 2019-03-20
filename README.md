@@ -107,7 +107,7 @@ const BananaEditor = ({ color }) => {
 };
 ```
 
-This will clear the `isSaving` & `isSaved` flags 3 seconds after the `POST` finishes successfully.
+This will clear the `isSaved` flags 3 seconds after the `POST` finishes successfully.
 
 ### Conditional Fetching
 
