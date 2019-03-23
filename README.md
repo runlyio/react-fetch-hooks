@@ -2,6 +2,50 @@
 
 > A set of react hooks to work with the fetch API and gracefully parse & deal with HTTP errors.
 
+```js
+const { isFetching, isFetched, error, data } =
+		useFetch(`https://api.example.com/`);
+
+const { isFetching, isFetched, error, data: result, fetch: saveThing } =
+		useLazyFetch({
+			url: `https://api.example.com/`,
+			method: "POST"
+		});
+
+// ...later, maybe in response to a user action
+saveThing();
+```
+
+See more [in-depth examples](#examples).
+
+## Install
+
+Install with [Yarn](https://yarnpkg.com/en/):
+
+```
+yarn add react-fetch-hooks
+```
+
+or if Yarn isn't your thing:
+
+```
+npm install react-fetch-hooks --save
+```
+
+### Polyfill the Browser
+
+[See here for a browser polyfill](https://github.com/github/fetch) if you are using the [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) in a browser that doesn't support it yet.
+
+### Polyfill the Server
+
+If using this library in node, make use of the [`node-fetch` library](https://github.com/bitinn/node-fetch) to polyfill `fetch`:
+
+```js
+global.fetch = require("node-fetch");
+```
+
+Do that at the beginning of the entry point for your app and then you can use `react-fetch-hooks` as normal.
+
 ## Examples
 
 ```js
@@ -166,35 +210,7 @@ const MyBanana = ({ id, authToken = "mytoken" }) => {
 
 This will make a `GET` request adding an `Authorization` header with the value `Bearer mytoken`.
 
-## Install
-
-Install with [Yarn](https://yarnpkg.com/en/):
-
-```
-yarn add react-fetch-hooks
-```
-
-or if Yarn isn't your thing:
-
-```
-npm install react-fetch-hooks --save
-```
-
-### Polyfill the Browser
-
-[See here for a browser polyfill](https://github.com/github/fetch) if you are using the [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) in a browser that doesn't support it yet.
-
-### Polyfill the Server
-
-If using this library in node, make use of the [`node-fetch` library](https://github.com/bitinn/node-fetch) to polyfill `fetch`:
-
-```js
-global.fetch = require("node-fetch");
-```
-
-Do that at the beginning of the entry point for your app and then you can use `react-fetch-hooks` as normal.
-
-## API Reference
+## Utility Functions
 
 The package includes some other utility functions that can be used outside the context of a hook.
 
