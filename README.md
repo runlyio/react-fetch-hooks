@@ -32,9 +32,13 @@ or if Yarn isn't your thing:
 npm install react-fetch-hooks --save
 ```
 
+This library makes use of and assumes the [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) is available on the global scope. You will need to polyfill it if it is not available in the current environment.
+
 ### Polyfill the Browser
 
-[See here for a browser polyfill](https://github.com/github/fetch) if you are using the [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) in a browser that doesn't support it yet.
+All evergreen browsers already support `fetch`. You should really only need a polyfill if you want this library to work in IE 🤮. See the [full support matrix for fetch](https://caniuse.com/#search=fetch).
+
+Try using [Github's fetch polyfill](https://github.com/github/fetch) or add a reference to [polyfill.io](https://polyfill.io/) if you decide you need to polyfill.
 
 ### Polyfill the Server
 
