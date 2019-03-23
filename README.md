@@ -5,7 +5,11 @@
 ```js
 const { isFetching, isFetched, error, data } =
 		useFetch(`https://api.example.com/`);
+```
 
+or
+
+```js
 const { isFetching, isFetched, error, data: result, fetch: saveThing } =
 		useLazyFetch({
 			url: `https://api.example.com/`,
