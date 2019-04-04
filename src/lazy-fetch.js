@@ -1,6 +1,6 @@
 import { isString } from "lodash";
 
-import useRequestInitialState from "./request-initial-state";
+import useRequestState from "./request-state";
 import useFetchFn from "./fetch-fn";
 import useRefreshInterval from "./refresh-interval";
 import useResetDelay from "./reset-delay";
@@ -17,7 +17,7 @@ const useLazyFetch = itemToFetch => {
 		setError,
 		timerSignal,
 		resetTimer
-	} = useRequestInitialState();
+	} = useRequestState();
 
 	let { url, resetDelay, refreshInterval, ...opts } = prepareHeaders(
 		itemToFetch
