@@ -19,7 +19,7 @@ const useLazyFetch = itemToFetch => {
 		resetTimer
 	} = useRequestInitialState();
 
-	let { url, resetDelay, refreshInterval, ...opts } = parseItemToFetch(
+	let { url, resetDelay, refreshInterval, ...opts } = prepareHeaders(
 		itemToFetch
 	);
 
@@ -61,7 +61,7 @@ const useLazyFetch = itemToFetch => {
 	};
 };
 
-function parseItemToFetch(itemToFetch) {
+function prepareHeaders(itemToFetch) {
 	let { url, bearerToken, ...opts } = itemToFetch || {};
 
 	if (!url && isString(itemToFetch)) {
