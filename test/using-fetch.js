@@ -339,34 +339,49 @@ describe("Using fetch hook", function() {
 	});
 
 	describe("when rendering a component with a bearer token", function() {
-		beforeEach(function(done) {
-			const Hooked = () => {
-				this.result = useFetch({
+		function behavesLikeRenderingComponentWithBearerToken(doTheThing) {
+			beforeEach(function(done) {
+				const Hooked = () => {
+					this.result = doTheThing();
+
+					return <span>ohhai</span>;
+				};
+
+				this.wrapper = mount(<Hooked />);
+
+				setTimeout(done, 10);
+			});
+
+			it("should set authorization header", function() {
+				const req = this.requests[0];
+
+				expect(req.headers).to.be.ok;
+				expect(req.headers["Authorization"]).to.equal("Bearer poop");
+			});
+		}
+
+		describe("using options syntax", function() {
+			behavesLikeRenderingComponentWithBearerToken(() =>
+				useFetch({
 					url: `http://example.com/api/bananas/`,
 					bearerToken: `poop`
-				});
-
-				return <span>ohhai</span>;
-			};
-
-			this.wrapper = mount(<Hooked />);
-
-			setTimeout(done, 10);
+				})
+			);
 		});
 
-		it("should set authorization header", function() {
-			const req = this.requests[0];
-
-			expect(req.headers).to.be.ok;
-			expect(req.headers["Authorization"]).to.equal("Bearer poop");
+		describe("using URL & options syntax", function() {
+			behavesLikeRenderingComponentWithBearerToken(() =>
+				useFetch(`http://example.com/api/bananas/`, {
+					bearerToken: `poop`
+				})
+			);
 		});
 	});
 
 	describe("when rendering a component with specific headers", function() {
 		beforeEach(function(done) {
 			const Hooked = () => {
-				this.result = useFetch({
-					url: `http://example.com/api/bananas/`,
+				this.result = useFetch(`http://example.com/api/bananas/`, {
 					headers: {
 						Authorization: "wha",
 						Accept: "text/plain",
@@ -430,8 +445,7 @@ describe("Using fetch hook", function() {
 	describe("when rendering a component with a lazy function", function() {
 		beforeEach(function(done) {
 			const Hooked = ({ name }) => {
-				this.result = useLazyFetch({
-					url: `http://example.com/api/bananas/`,
+				this.result = useLazyFetch(`http://example.com/api/bananas/`, {
 					method: "POST",
 					body: JSON.stringify({ name })
 				});
@@ -863,6 +877,29 @@ describe("Using fetch hook", function() {
 					Accept: "text/plain"
 				}
 			});
+		});
+	});
+
+	describe("when rendering a component with invalid arguments", function() {
+		function shouldThrowAnError(doTheThing) {
+			it("should throw an error", function() {
+				const Hooked = () => {
+					this.result = doTheThing();
+					return <span>oh</span>;
+				};
+
+				expect(() => mount(<Hooked />)).to.throw();
+			});
+		}
+
+		describe("with 3 parameters", function() {
+			shouldThrowAnError(() => useFetch("https://api.example.com/", {}, {}));
+		});
+
+		describe("with 2 parameters but the second parameter is a string", function() {
+			shouldThrowAnError(() =>
+				useFetch("https://api.example.com/", "https://api.example.com/")
+			);
 		});
 	});
 });

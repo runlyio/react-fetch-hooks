@@ -5,7 +5,7 @@ import useFetchFn from "./fetch-fn";
 import useRefreshInterval from "./refresh-interval";
 import useResetDelay from "./reset-delay";
 
-const useLazyFetch = itemToFetch => {
+const useLazyFetch = (...args) => {
 	const {
 		isFetching,
 		setIsFetching,
@@ -19,9 +19,7 @@ const useLazyFetch = itemToFetch => {
 		resetTimer
 	} = useRequestState();
 
-	let { url, resetDelay, refreshInterval, ...opts } = prepareHeaders(
-		itemToFetch
-	);
+	let { url, resetDelay, refreshInterval, ...opts } = parseArguments(args);
 
 	if (resetDelay && refreshInterval) {
 		throw new Error(
@@ -60,6 +58,30 @@ const useLazyFetch = itemToFetch => {
 		fetch: fetchFn
 	};
 };
+
+function parseArguments(args) {
+	if (args) {
+		if (args.length == 1) {
+			return prepareHeaders(args[0]);
+		}
+
+		if (args.length == 2) {
+			if (isString(args[1])) {
+				throw new Error(
+					"The second argument to the fetch hook should be an options object, not a string."
+				);
+			}
+
+			return prepareHeaders({ ...args[1], url: args[0] });
+		}
+
+		throw new Error(
+			"The fetch hook only takes one or two arguments. See usage instructions: https://github.com/civicsource/react-fetch-hooks/blob/master/README.md"
+		);
+	}
+
+	return {};
+}
 
 function prepareHeaders(itemToFetch) {
 	let { url, bearerToken, ...opts } = itemToFetch || {};
