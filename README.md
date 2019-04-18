@@ -11,8 +11,7 @@ or
 
 ```js
 const { isFetching, isFetched, error, data: result, fetch: saveThing } =
-		useLazyFetch({
-			url: `https://api.example.com/`,
+		useLazyFetch(`https://api.example.com/`, {
 			method: "POST"
 		});
 
@@ -140,8 +139,7 @@ import { useLazyFetch } from "react-fetch-hooks";
 
 const BananaEditor = ({ color }) => {
 	const { isFetching: isSaving, isFetched: isSaved, fetch: saveBanana } =
-		useLazyFetch({
-			url: "https://api.example.com/bananas/",
+		useLazyFetch("https://api.example.com/bananas/", {
 			method: "POST",
 			body: JSON.stringify({ color }),
 			resetDelay: 3000
@@ -206,8 +204,7 @@ import React from "react";
 import { useFetch } from "react-fetch-hooks";
 
 const MyBanana = ({ id, authToken = "mytoken" }) => {
-	const { data: banana } = useFetch({
-		url: `https://api.example.com/bananas/${id}`,
+	const { data: banana } = useFetch(`https://api.example.com/bananas/${id}`, {
 		bearerToken: authToken
 	});
 
