@@ -1,25 +1,19 @@
 import { expect } from "chai";
 import behavesLikeBrowser from "./behaves-like-browser";
 
-import React from "react";
-import { configure, mount } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
+import { renderHook, cleanup } from "react-hooks-testing-library";
 
 import { useFetch, useLazyFetch } from "../src";
 
-configure({ adapter: new Adapter() });
-
 describe("Using fetch hook", function() {
+	afterEach(cleanup);
 	behavesLikeBrowser();
 
 	describe("when rendering a component with just a URL", function() {
 		beforeEach(function(done) {
-			const Hooked = () => {
-				this.result = useFetch("http://example.com/api/bananas/");
-				return <span>Hello</span>;
-			};
-
-			this.wrapper = mount(<Hooked />);
+			const r = renderHook(() => useFetch("http://example.com/api/bananas/"));
+			this.result = r.result;
+			this.rerender = r.rerender;
 
 			setTimeout(done, 10);
 		});
@@ -40,9 +34,9 @@ describe("Using fetch hook", function() {
 		});
 
 		it("should indicate the data is fetching", function() {
-			expect(this.result).to.be.ok;
+			expect(this.result.current).to.be.ok;
 
-			const { isFetching, isFetched, error, data } = this.result;
+			const { isFetching, isFetched, error, data } = this.result.current;
 
 			expect(isFetching).to.be.true;
 			expect(isFetched).to.be.false;
@@ -63,9 +57,9 @@ describe("Using fetch hook", function() {
 			});
 
 			it("should return results as loaded", function() {
-				expect(this.result).to.be.ok;
+				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result;
+				const { isFetching, isFetched, error, data } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.true;
@@ -79,7 +73,7 @@ describe("Using fetch hook", function() {
 
 			describe("and then setting setting arbitrary props on the component", function() {
 				beforeEach(function(done) {
-					this.wrapper.setProps({ hello: "world" });
+					this.rerender({ hello: "world" });
 
 					setTimeout(done, 10);
 				});
@@ -104,9 +98,9 @@ describe("Using fetch hook", function() {
 			});
 
 			it("should return results as errored", function() {
-				expect(this.result).to.be.ok;
+				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result;
+				const { isFetching, isFetched, error, data } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.false;
@@ -123,7 +117,7 @@ describe("Using fetch hook", function() {
 
 			describe("and then setting setting arbitrary props on the component", function() {
 				beforeEach(function(done) {
-					this.wrapper.setProps({ hello: "world" });
+					this.rerender({ hello: "world" });
 
 					setTimeout(done, 10);
 				});
@@ -137,18 +131,15 @@ describe("Using fetch hook", function() {
 
 	describe("when rendering a component with a parameterized URL", function() {
 		beforeEach(function(done) {
-			const Hooked = ({ id, name }) => {
-				this.result = useFetch({
-					url: `http://example.com/api/bananas/${id}`
-				});
-				return (
-					<span>
-						{id}:{name}
-					</span>
-				);
-			};
-
-			this.wrapper = mount(<Hooked id={4} />);
+			const r = renderHook(
+				({ id }) =>
+					useFetch({
+						url: `http://example.com/api/bananas/${id}`
+					}),
+				{ initialProps: { id: 4 } }
+			);
+			this.result = r.result;
+			this.rerender = r.rerender;
 
 			setTimeout(done, 10);
 		});
@@ -159,9 +150,9 @@ describe("Using fetch hook", function() {
 		});
 
 		it("should return results as fetching", function() {
-			expect(this.result).to.be.ok;
+			expect(this.result.current).to.be.ok;
 
-			const { isFetching, isFetched, error, data } = this.result;
+			const { isFetching, isFetched, error, data } = this.result.current;
 
 			expect(isFetching).to.be.true;
 			expect(isFetched).to.be.false;
@@ -182,9 +173,9 @@ describe("Using fetch hook", function() {
 			});
 
 			it("should return results as fetched", function() {
-				expect(this.result).to.be.ok;
+				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result;
+				const { isFetching, isFetched, error, data } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.true;
@@ -198,7 +189,7 @@ describe("Using fetch hook", function() {
 
 			describe("and then setting a keyed prop on the component", function() {
 				beforeEach(function(done) {
-					this.wrapper.setProps({ id: 69 });
+					this.rerender({ id: 69 });
 
 					setTimeout(done, 10);
 				});
@@ -211,9 +202,9 @@ describe("Using fetch hook", function() {
 				});
 
 				it("should return results as fetching and still pass previously loaded data", function() {
-					expect(this.result).to.be.ok;
+					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, data } = this.result;
+					const { isFetching, isFetched, error, data } = this.result.current;
 
 					expect(isFetching).to.be.true;
 					expect(isFetched).to.be.true;
@@ -237,9 +228,9 @@ describe("Using fetch hook", function() {
 					});
 
 					it("should return newly loaded data", function() {
-						expect(this.result).to.be.ok;
+						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, data } = this.result;
+						const { isFetching, isFetched, error, data } = this.result.current;
 
 						expect(isFetching).to.be.false;
 						expect(isFetched).to.be.true;
@@ -255,7 +246,7 @@ describe("Using fetch hook", function() {
 
 			describe("and then setting setting arbitrary props on the component", function() {
 				beforeEach(function(done) {
-					this.wrapper.setProps({ name: "James Bond" });
+					this.rerender({ id: 4, name: "James Bond" });
 
 					setTimeout(done, 10);
 				});
@@ -280,9 +271,9 @@ describe("Using fetch hook", function() {
 			});
 
 			it("should return result as errored", function() {
-				expect(this.result).to.be.ok;
+				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result;
+				const { isFetching, isFetched, error, data } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.false;
@@ -299,7 +290,7 @@ describe("Using fetch hook", function() {
 
 			describe("and then setting a keyed prop on the component", function() {
 				beforeEach(function(done) {
-					this.wrapper.setProps({ id: 420 });
+					this.rerender({ id: 420 });
 
 					setTimeout(done, 10);
 				});
@@ -312,9 +303,9 @@ describe("Using fetch hook", function() {
 				});
 
 				it("should return result as fetching and no longer errored", function() {
-					expect(this.result).to.be.ok;
+					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, data } = this.result;
+					const { isFetching, isFetched, error, data } = this.result.current;
 
 					expect(isFetching).to.be.true;
 					expect(isFetched).to.be.false;
@@ -326,7 +317,7 @@ describe("Using fetch hook", function() {
 
 			describe("and then setting setting arbitrary props on the component", function() {
 				beforeEach(function(done) {
-					this.wrapper.setProps({ name: "Homer Simpson" });
+					this.rerender({ id: 4, name: "Homer Simpson" });
 
 					setTimeout(done, 10);
 				});
@@ -341,14 +332,7 @@ describe("Using fetch hook", function() {
 	describe("when rendering a component with a bearer token", function() {
 		function behavesLikeRenderingComponentWithBearerToken(doTheThing) {
 			beforeEach(function(done) {
-				const Hooked = () => {
-					this.result = doTheThing();
-
-					return <span>ohhai</span>;
-				};
-
-				this.wrapper = mount(<Hooked />);
-
+				renderHook(doTheThing);
 				setTimeout(done, 10);
 			});
 
@@ -380,19 +364,15 @@ describe("Using fetch hook", function() {
 
 	describe("when rendering a component with specific headers", function() {
 		beforeEach(function(done) {
-			const Hooked = () => {
-				this.result = useFetch(`http://example.com/api/bananas/`, {
+			renderHook(() =>
+				useFetch(`http://example.com/api/bananas/`, {
 					headers: {
 						Authorization: "wha",
 						Accept: "text/plain",
 						"Content-Type": "text/plain"
 					}
-				});
-
-				return <span>ohhai</span>;
-			};
-
-			this.wrapper = mount(<Hooked />);
+				})
+			);
 
 			setTimeout(done, 10);
 		});
@@ -411,12 +391,8 @@ describe("Using fetch hook", function() {
 
 	describe("when rendering a component that returns a 204", function() {
 		beforeEach(function(done) {
-			const Hooked = () => {
-				this.result = useFetch(`http://example.com/api/bananas/`);
-				return <span>ohhai</span>;
-			};
-
-			this.wrapper = mount(<Hooked />);
+			const r = renderHook(() => useFetch(`http://example.com/api/bananas/`));
+			this.result = r.result;
 
 			setTimeout(done, 10);
 		});
@@ -431,9 +407,9 @@ describe("Using fetch hook", function() {
 		});
 
 		it("should return null data", function() {
-			expect(this.result).to.be.ok;
+			expect(this.result.current).to.be.ok;
 
-			const { isFetching, isFetched, error, data } = this.result;
+			const { isFetching, isFetched, error, data } = this.result.current;
 
 			expect(isFetching).to.be.false;
 			expect(isFetched).to.be.true;
@@ -444,15 +420,16 @@ describe("Using fetch hook", function() {
 
 	describe("when rendering a component with a lazy function", function() {
 		beforeEach(function(done) {
-			const Hooked = ({ name }) => {
-				this.result = useLazyFetch(`http://example.com/api/bananas/`, {
-					method: "POST",
-					body: JSON.stringify({ name })
-				});
-				return <span>{name}</span>;
-			};
-
-			this.wrapper = mount(<Hooked name="Homer" />);
+			const r = renderHook(
+				({ name }) =>
+					useLazyFetch(`http://example.com/api/bananas/`, {
+						method: "POST",
+						body: JSON.stringify({ name })
+					}),
+				{ initialProps: { name: "Homer" } }
+			);
+			this.result = r.result;
+			this.rerender = r.rerender;
 
 			setTimeout(done, 10);
 		});
@@ -462,9 +439,9 @@ describe("Using fetch hook", function() {
 		});
 
 		it("should return lazy function and fetch results", function() {
-			expect(this.result).to.be.ok;
+			expect(this.result.current).to.be.ok;
 
-			const { fetch, isFetching, isFetched, error, data } = this.result;
+			const { fetch, isFetching, isFetched, error, data } = this.result.current;
 
 			expect(fetch).to.be.ok;
 			expect(fetch).to.be.a("function");
@@ -478,7 +455,7 @@ describe("Using fetch hook", function() {
 
 		describe("and then invoking the lazy function", function() {
 			beforeEach(function(done) {
-				this.result.fetch();
+				this.result.current.fetch();
 
 				setTimeout(done, 10);
 			});
@@ -494,9 +471,9 @@ describe("Using fetch hook", function() {
 			});
 
 			it("should return fetch results", function() {
-				expect(this.result).to.be.ok;
+				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result;
+				const { isFetching, isFetched, error, data } = this.result.current;
 
 				expect(isFetching).to.be.true;
 				expect(isFetched).to.be.false;
@@ -505,19 +482,42 @@ describe("Using fetch hook", function() {
 				expect(data).to.not.be.ok;
 			});
 		});
+
+		describe("and then changing props that are part of the request body", function() {
+			beforeEach(function(done) {
+				this.rerender({ name: "Bart" });
+
+				setTimeout(done, 10);
+			});
+
+			describe("and then invoking the lazy function", function() {
+				beforeEach(function(done) {
+					this.result.current.fetch();
+
+					setTimeout(done, 10);
+				});
+
+				it("should make a fetch API request with new body data", function() {
+					expect(this.requests.length).to.equal(1);
+
+					const req = this.requests[0];
+
+					expect(req.url).to.equal("http://example.com/api/bananas/");
+					expect(req.method).to.equal("POST");
+					expect(req.body).to.equal('{"name":"Bart"}');
+				});
+			});
+		});
 	});
 
 	describe("when rendering a component with a reset", function() {
 		function behavesLikeTestingReset(useHook, triggerFetch) {
 			beforeEach(function(done) {
-				const Hooked = props => {
-					this.result = useHook(props);
-					return <span>{props.id}</span>;
-				};
+				const r = renderHook(useHook, { initialProps: { id: 69 } });
+				this.result = r.result;
+				this.rerender = r.rerender;
 
-				this.wrapper = mount(<Hooked id={69} />);
-
-				if (this.result.fetch) this.result.fetch();
+				if (this.result.current.fetch) this.result.current.fetch();
 
 				setTimeout(done, 10);
 			});
@@ -533,9 +533,9 @@ describe("Using fetch hook", function() {
 			});
 
 			it("should return result", function() {
-				expect(this.result).to.be.ok;
+				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result;
+				const { isFetching, isFetched, error, data } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.true;
@@ -550,9 +550,9 @@ describe("Using fetch hook", function() {
 				});
 
 				it("should clear result data", function() {
-					expect(this.result).to.be.ok;
+					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, data } = this.result;
+					const { isFetching, isFetched, error, data } = this.result.current;
 
 					expect(isFetching).to.be.false;
 					expect(isFetched).to.be.false;
@@ -565,15 +565,15 @@ describe("Using fetch hook", function() {
 			describe("and then triggering another fetch before the reset threshold time", function() {
 				beforeEach(function(done) {
 					setTimeout(() => {
-						triggerFetch(this.wrapper, this.result);
+						triggerFetch(this.rerender, this.result.current);
 						setTimeout(done, 10);
 					}, 30);
 				});
 
 				it("should mark status as refetching", function() {
-					expect(this.result).to.be.ok;
+					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, data } = this.result;
+					const { isFetching, isFetched, error, data } = this.result.current;
 
 					expect(isFetching).to.be.true;
 					expect(isFetched).to.be.true;
@@ -588,9 +588,9 @@ describe("Using fetch hook", function() {
 					});
 
 					it("should not reset data", function() {
-						expect(this.result).to.be.ok;
+						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, data } = this.result;
+						const { isFetching, isFetched, error, data } = this.result.current;
 
 						expect(isFetching).to.be.true;
 						expect(isFetched).to.be.true;
@@ -612,9 +612,9 @@ describe("Using fetch hook", function() {
 					});
 
 					it("should not reset data", function() {
-						expect(this.result).to.be.ok;
+						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, data } = this.result;
+						const { isFetching, isFetched, error, data } = this.result.current;
 
 						expect(isFetching).to.be.false;
 						expect(isFetched).to.be.true;
@@ -629,9 +629,14 @@ describe("Using fetch hook", function() {
 						});
 
 						it("should clear the result data", function() {
-							expect(this.result).to.be.ok;
+							expect(this.result.current).to.be.ok;
 
-							const { isFetching, isFetched, error, data } = this.result;
+							const {
+								isFetching,
+								isFetched,
+								error,
+								data
+							} = this.result.current;
 
 							expect(isFetching).to.be.false;
 							expect(isFetched).to.be.false;
@@ -650,7 +655,7 @@ describe("Using fetch hook", function() {
 					url: `http://example.com/api/bananas/${id}`,
 					resetDelay: 100
 				}),
-			wrapper => wrapper.setProps({ id: 420 })
+			rerender => rerender({ id: 420 })
 		);
 
 		describe("and a lazy function", function() {
@@ -662,7 +667,7 @@ describe("Using fetch hook", function() {
 						body: JSON.stringify({ id }),
 						resetDelay: 100
 					}),
-				(wrapper, { fetch }) => fetch()
+				(_, { fetch }) => fetch()
 			);
 		});
 	});
@@ -670,22 +675,13 @@ describe("Using fetch hook", function() {
 	describe("when rendering a component with a refresh interval", function() {
 		function behavesLikeTestingRefresh(useHook, triggerFetch) {
 			beforeEach(function(done) {
-				const Hooked = props => {
-					this.result = useHook(props);
-					return <span>{props.id}</span>;
-				};
+				const r = renderHook(useHook, { initialProps: { id: 69 } });
+				this.result = r.result;
+				this.rerender = r.rerender;
 
-				this.wrapper = mount(<Hooked id={69} />);
-
-				if (this.result.fetch) this.result.fetch();
+				if (this.result.current.fetch) this.result.current.fetch();
 
 				setTimeout(done, 10);
-			});
-
-			afterEach(function() {
-				if (this.wrapper) {
-					this.wrapper.unmount();
-				}
 			});
 
 			describe("with a successful server response", function() {
@@ -700,9 +696,9 @@ describe("Using fetch hook", function() {
 				});
 
 				it("should return result", function() {
-					expect(this.result).to.be.ok;
+					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, data } = this.result;
+					const { isFetching, isFetched, error, data } = this.result.current;
 
 					expect(isFetching).to.be.false;
 					expect(isFetched).to.be.true;
@@ -717,9 +713,9 @@ describe("Using fetch hook", function() {
 					});
 
 					it("should mark data as loading without clearing data", function() {
-						expect(this.result).to.be.ok;
+						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, data } = this.result;
+						const { isFetching, isFetched, error, data } = this.result.current;
 
 						expect(isFetching).to.be.true;
 						expect(isFetched).to.be.true;
@@ -732,15 +728,15 @@ describe("Using fetch hook", function() {
 				describe("and then triggering another fetch before the refresh threshold time", function() {
 					beforeEach(function(done) {
 						setTimeout(() => {
-							triggerFetch(this.wrapper, this.result);
+							triggerFetch(this.rerender, this.result.current);
 							setTimeout(done, 10);
 						}, 30);
 					});
 
 					it("should mark status as refetching", function() {
-						expect(this.result).to.be.ok;
+						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, data } = this.result;
+						const { isFetching, isFetched, error, data } = this.result.current;
 
 						expect(isFetching).to.be.true;
 						expect(isFetched).to.be.true;
@@ -761,9 +757,14 @@ describe("Using fetch hook", function() {
 						});
 
 						it("should not refresh data", function() {
-							expect(this.result).to.be.ok;
+							expect(this.result.current).to.be.ok;
 
-							const { isFetching, isFetched, error, data } = this.result;
+							const {
+								isFetching,
+								isFetched,
+								error,
+								data
+							} = this.result.current;
 
 							expect(isFetching).to.be.false;
 							expect(isFetched).to.be.true;
@@ -778,9 +779,14 @@ describe("Using fetch hook", function() {
 							});
 
 							it("should refresh the data", function() {
-								expect(this.result).to.be.ok;
+								expect(this.result.current).to.be.ok;
 
-								const { isFetching, isFetched, error, data } = this.result;
+								const {
+									isFetching,
+									isFetched,
+									error,
+									data
+								} = this.result.current;
 
 								expect(isFetching).to.be.true;
 								expect(isFetched).to.be.true;
@@ -800,7 +806,7 @@ describe("Using fetch hook", function() {
 					url: `http://example.com/api/bananas/${id}`,
 					refreshInterval: 100
 				}),
-			wrapper => wrapper.setProps({ id: 420 })
+			rerender => rerender({ id: 420 })
 		);
 
 		describe("and a lazy function", function() {
@@ -812,35 +818,34 @@ describe("Using fetch hook", function() {
 						body: JSON.stringify({ id }),
 						refreshInterval: 100
 					}),
-				(wrapper, { fetch }) => fetch()
+				(_, { fetch }) => fetch()
 			);
 		});
 	});
 
 	describe("when rendering a component with a refresh interval and a reset delay", function() {
 		it("should throw an error", function() {
-			const Hooked = props => {
-				this.result = useFetch({
+			const {
+				result: { error }
+			} = renderHook(() =>
+				useFetch({
 					url: "https://api.example.com/bananas/",
 					refreshInterval: 10,
 					resetDelay: 30
-				});
-				return <span>{props.id}</span>;
-			};
+				})
+			);
 
-			expect(() => mount(<Hooked id={69} />)).to.throw();
+			expect(error).to.be.ok;
+			expect(error.message).to.contain("resetDelay");
+			expect(error.message).to.contain("refreshInterval");
 		});
 	});
 
 	describe("when rendering a component with nothing to fetch", function() {
 		function behavesLikeNothingToFetch(itemToFetch) {
 			beforeEach(function(done) {
-				const Hooked = ({ id }) => {
-					this.result = useFetch(itemToFetch);
-					return <span>{id}</span>;
-				};
-
-				this.wrapper = mount(<Hooked id={69} />);
+				const r = renderHook(() => useFetch(itemToFetch));
+				this.result = r.result;
 
 				setTimeout(done, 10);
 			});
@@ -850,9 +855,9 @@ describe("Using fetch hook", function() {
 			});
 
 			it("should return empty result data", function() {
-				expect(this.result).to.be.ok;
+				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result;
+				const { isFetching, isFetched, error, data } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.false;
@@ -878,17 +883,25 @@ describe("Using fetch hook", function() {
 				}
 			});
 		});
+
+		describe("with missing URL with different syntax", function() {
+			behavesLikeNothingToFetch("", {
+				headers: {
+					Accept: "text/plain"
+				}
+			});
+		});
 	});
 
 	describe("when rendering a component with invalid arguments", function() {
 		function shouldThrowAnError(doTheThing) {
 			it("should throw an error", function() {
-				const Hooked = () => {
-					this.result = doTheThing();
-					return <span>oh</span>;
-				};
+				const {
+					result: { error }
+				} = renderHook(doTheThing);
 
-				expect(() => mount(<Hooked />)).to.throw();
+				expect(error).to.be.ok;
+				expect(error.message).to.contain("argument");
 			});
 		}
 
