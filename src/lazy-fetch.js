@@ -84,12 +84,15 @@ function parseArguments(args) {
 }
 
 function prepareHeaders(itemToFetch) {
-	let url, bearerToken, opts = {};
+	let url,
+		bearerToken,
+		opts = {};
 
 	if (isString(itemToFetch)) {
 		url = itemToFetch;
 	} else {
-		const { url: _url, bearerToken: _bearerToken, ..._opts } = itemToFetch || {};
+		const { url: _url, bearerToken: _bearerToken, ..._opts } =
+			itemToFetch || {};
 		url = _url;
 		bearerToken = _bearerToken;
 		opts = _opts;
