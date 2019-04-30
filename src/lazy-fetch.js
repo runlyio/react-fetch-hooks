@@ -84,7 +84,7 @@ function parseArguments(args) {
 }
 
 function prepareHeaders(itemToFetch) {
-	let url, bearerToken, opts;
+	let url, bearerToken, opts = {};
 
 	if (isString(itemToFetch)) {
 		url = itemToFetch;
