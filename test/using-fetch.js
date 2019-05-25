@@ -50,6 +50,9 @@ describe("Using fetch hook", function() {
 				this.requests.pop().resolve({
 					status: 200,
 					statusText: "OK",
+					headers: {
+						"Content-Type": "application/json"
+					},
 					json: async () => ["ripe banana", "green banana"]
 				});
 
@@ -69,6 +72,17 @@ describe("Using fetch hook", function() {
 				expect(data).to.have.lengthOf(2);
 				expect(data[0]).to.equal("ripe banana");
 				expect(data[1]).to.equal("green banana");
+			});
+
+			it("should return response with headers and body", function() {
+				const current = this.result.current;
+
+				expect(current.response).to.exist;
+				expect(current.response.headers).to.exist;
+				expect(current.response.body).to.exist;
+				expect(current.response.headers).to.deep.equal({
+					"Content-Type": "application/json"
+				});
 			});
 
 			describe("and then setting setting arbitrary props on the component", function() {
