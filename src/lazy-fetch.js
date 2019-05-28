@@ -45,6 +45,7 @@ const useLazyFetch = (...args) => {
 	useResetDelay({
 		resetDelay,
 		setBody,
+		setHeaders,
 		setError,
 		setIsFetched,
 		setIsFetching,

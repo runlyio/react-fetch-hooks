@@ -539,6 +539,9 @@ describe("Using fetch hook", function() {
 				this.requests.pop().resolve({
 					status: 200,
 					statusText: "OK",
+					headers: {
+						"Content-Type": "application/json"
+					},
 					json: async () => ({ name: "Bob" })
 				});
 
@@ -562,16 +565,23 @@ describe("Using fetch hook", function() {
 					setTimeout(done, 110);
 				});
 
-				it("should clear result body", function() {
+				it("should clear result body and headers", function() {
 					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, body } = this.result.current;
+					const {
+						isFetching,
+						isFetched,
+						error,
+						body,
+						headers
+					} = this.result.current;
 
 					expect(isFetching).to.be.false;
 					expect(isFetched).to.be.false;
 					expect(error).to.not.be.ok;
 
 					expect(body).to.not.be.ok;
+					expect(headers).to.not.be.ok;
 				});
 			});
 
