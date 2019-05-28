@@ -11,10 +11,10 @@ const useLazyFetch = (...args) => {
 		setIsFetching,
 		isFetched,
 		setIsFetched,
-		data,
-		setData,
-		response,
-		setResponse,
+		body,
+		setBody,
+		headers,
+		setHeaders,
 		error,
 		setError,
 		timerSignal,
@@ -38,13 +38,13 @@ const useLazyFetch = (...args) => {
 		setIsFetching,
 		setIsFetched,
 		setError,
-		setData,
-		setResponse
+		setBody,
+		setHeaders
 	});
 
 	useResetDelay({
 		resetDelay,
-		setData,
+		setBody,
 		setError,
 		setIsFetched,
 		setIsFetching,
@@ -56,8 +56,8 @@ const useLazyFetch = (...args) => {
 	return {
 		isFetching,
 		isFetched,
-		data,
-		response,
+		body,
+		headers,
 		error,
 		fetch: fetchFn
 	};

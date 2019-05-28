@@ -33,16 +33,16 @@ describe("Using fetch hook", function() {
 			expect(req.headers["Content-Type"]).to.equal("application/json");
 		});
 
-		it("should indicate the data is fetching", function() {
+		it("should indicate the body is fetching", function() {
 			expect(this.result.current).to.be.ok;
 
-			const { isFetching, isFetched, error, data } = this.result.current;
+			const { isFetching, isFetched, error, body } = this.result.current;
 
 			expect(isFetching).to.be.true;
 			expect(isFetched).to.be.false;
 			expect(error).to.not.be.ok;
 
-			expect(data).to.not.be.ok;
+			expect(body).to.not.be.ok;
 		});
 
 		describe("with a successful server response", function() {
@@ -62,25 +62,24 @@ describe("Using fetch hook", function() {
 			it("should return results as loaded", function() {
 				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result.current;
+				const { isFetching, isFetched, error, body } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.true;
 				expect(error).to.not.be.ok;
 
-				expect(data).to.be.ok;
-				expect(data).to.have.lengthOf(2);
-				expect(data[0]).to.equal("ripe banana");
-				expect(data[1]).to.equal("green banana");
+				expect(body).to.be.ok;
+				expect(body).to.have.lengthOf(2);
+				expect(body[0]).to.equal("ripe banana");
+				expect(body[1]).to.equal("green banana");
 			});
 
-			it("should return response with headers and body", function() {
+			it("should return with headers and body", function() {
 				const current = this.result.current;
 
-				expect(current.response).to.exist;
-				expect(current.response.headers).to.exist;
-				expect(current.response.body).to.exist;
-				expect(current.response.headers).to.deep.equal({
+				expect(current.headers).to.exist;
+				expect(current.body).to.exist;
+				expect(current.headers).to.deep.equal({
 					"Content-Type": "application/json"
 				});
 			});
@@ -114,7 +113,7 @@ describe("Using fetch hook", function() {
 			it("should return results as errored", function() {
 				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result.current;
+				const { isFetching, isFetched, error, body } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.false;
@@ -126,7 +125,7 @@ describe("Using fetch hook", function() {
 				expect(error.response).to.be.ok;
 				expect(error.response.status).to.equal(500);
 
-				expect(data).to.not.be.ok;
+				expect(body).to.not.be.ok;
 			});
 
 			describe("and then setting setting arbitrary props on the component", function() {
@@ -166,13 +165,13 @@ describe("Using fetch hook", function() {
 		it("should return results as fetching", function() {
 			expect(this.result.current).to.be.ok;
 
-			const { isFetching, isFetched, error, data } = this.result.current;
+			const { isFetching, isFetched, error, body } = this.result.current;
 
 			expect(isFetching).to.be.true;
 			expect(isFetched).to.be.false;
 			expect(error).to.not.be.ok;
 
-			expect(data).to.not.be.ok;
+			expect(body).to.not.be.ok;
 		});
 
 		describe("with a successful server response", function() {
@@ -189,16 +188,16 @@ describe("Using fetch hook", function() {
 			it("should return results as fetched", function() {
 				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result.current;
+				const { isFetching, isFetched, error, body } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.true;
 				expect(error).to.not.be.ok;
 
-				expect(data).to.be.ok;
-				expect(data).to.have.lengthOf(2);
-				expect(data[0]).to.equal("ripe banana");
-				expect(data[1]).to.equal("green banana");
+				expect(body).to.be.ok;
+				expect(body).to.have.lengthOf(2);
+				expect(body[0]).to.equal("ripe banana");
+				expect(body[1]).to.equal("green banana");
 			});
 
 			describe("and then setting a keyed prop on the component", function() {
@@ -215,19 +214,19 @@ describe("Using fetch hook", function() {
 					);
 				});
 
-				it("should return results as fetching and still pass previously loaded data", function() {
+				it("should return results as fetching and still pass previously loaded body", function() {
 					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, data } = this.result.current;
+					const { isFetching, isFetched, error, body } = this.result.current;
 
 					expect(isFetching).to.be.true;
 					expect(isFetched).to.be.true;
 					expect(error).to.not.be.ok;
 
-					expect(data).to.be.ok;
-					expect(data).to.have.lengthOf(2);
-					expect(data[0]).to.equal("ripe banana");
-					expect(data[1]).to.equal("green banana");
+					expect(body).to.be.ok;
+					expect(body).to.have.lengthOf(2);
+					expect(body[0]).to.equal("ripe banana");
+					expect(body[1]).to.equal("green banana");
 				});
 
 				describe("with another successful server response", function() {
@@ -241,19 +240,19 @@ describe("Using fetch hook", function() {
 						setTimeout(done, 10);
 					});
 
-					it("should return newly loaded data", function() {
+					it("should return newly loaded body", function() {
 						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, data } = this.result.current;
+						const { isFetching, isFetched, error, body } = this.result.current;
 
 						expect(isFetching).to.be.false;
 						expect(isFetched).to.be.true;
 						expect(error).to.not.be.ok;
 
-						expect(data).to.be.ok;
-						expect(data).to.have.lengthOf(2);
-						expect(data[0]).to.equal("purple banana");
-						expect(data[1]).to.equal("orange banana");
+						expect(body).to.be.ok;
+						expect(body).to.have.lengthOf(2);
+						expect(body[0]).to.equal("purple banana");
+						expect(body[1]).to.equal("orange banana");
 					});
 				});
 			});
@@ -287,7 +286,7 @@ describe("Using fetch hook", function() {
 			it("should return result as errored", function() {
 				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result.current;
+				const { isFetching, isFetched, error, body } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.false;
@@ -299,7 +298,7 @@ describe("Using fetch hook", function() {
 				expect(error.response).to.be.ok;
 				expect(error.response.status).to.equal(500);
 
-				expect(data).to.not.be.ok;
+				expect(body).to.not.be.ok;
 			});
 
 			describe("and then setting a keyed prop on the component", function() {
@@ -319,13 +318,13 @@ describe("Using fetch hook", function() {
 				it("should return result as fetching and no longer errored", function() {
 					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, data } = this.result.current;
+					const { isFetching, isFetched, error, body } = this.result.current;
 
 					expect(isFetching).to.be.true;
 					expect(isFetched).to.be.false;
 					expect(error).to.not.be.ok;
 
-					expect(data).to.not.be.ok;
+					expect(body).to.not.be.ok;
 				});
 			});
 
@@ -420,15 +419,15 @@ describe("Using fetch hook", function() {
 			setTimeout(done, 10);
 		});
 
-		it("should return null data", function() {
+		it("should return null body", function() {
 			expect(this.result.current).to.be.ok;
 
-			const { isFetching, isFetched, error, data } = this.result.current;
+			const { isFetching, isFetched, error, body } = this.result.current;
 
 			expect(isFetching).to.be.false;
 			expect(isFetched).to.be.true;
 			expect(error).to.not.be.ok;
-			expect(data).to.not.be.ok;
+			expect(body).to.not.be.ok;
 		});
 	});
 
@@ -455,7 +454,7 @@ describe("Using fetch hook", function() {
 		it("should return lazy function and fetch results", function() {
 			expect(this.result.current).to.be.ok;
 
-			const { fetch, isFetching, isFetched, error, data } = this.result.current;
+			const { fetch, isFetching, isFetched, error, body } = this.result.current;
 
 			expect(fetch).to.be.ok;
 			expect(fetch).to.be.a("function");
@@ -464,7 +463,7 @@ describe("Using fetch hook", function() {
 			expect(isFetched).to.be.false;
 			expect(error).to.not.be.ok;
 
-			expect(data).to.not.be.ok;
+			expect(body).to.not.be.ok;
 		});
 
 		describe("and then invoking the lazy function", function() {
@@ -487,13 +486,13 @@ describe("Using fetch hook", function() {
 			it("should return fetch results", function() {
 				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result.current;
+				const { isFetching, isFetched, error, body } = this.result.current;
 
 				expect(isFetching).to.be.true;
 				expect(isFetched).to.be.false;
 				expect(error).to.not.be.ok;
 
-				expect(data).to.not.be.ok;
+				expect(body).to.not.be.ok;
 			});
 		});
 
@@ -511,7 +510,7 @@ describe("Using fetch hook", function() {
 					setTimeout(done, 10);
 				});
 
-				it("should make a fetch API request with new body data", function() {
+				it("should make a fetch API request with new body body", function() {
 					expect(this.requests.length).to.equal(1);
 
 					const req = this.requests[0];
@@ -549,13 +548,13 @@ describe("Using fetch hook", function() {
 			it("should return result", function() {
 				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result.current;
+				const { isFetching, isFetched, error, body } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.true;
 				expect(error).to.not.be.ok;
 
-				expect(data).to.deep.equal({ name: "Bob" });
+				expect(body).to.deep.equal({ name: "Bob" });
 			});
 
 			describe("and then waiting the reset threshold time", function() {
@@ -563,16 +562,16 @@ describe("Using fetch hook", function() {
 					setTimeout(done, 110);
 				});
 
-				it("should clear result data", function() {
+				it("should clear result body", function() {
 					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, data } = this.result.current;
+					const { isFetching, isFetched, error, body } = this.result.current;
 
 					expect(isFetching).to.be.false;
 					expect(isFetched).to.be.false;
 					expect(error).to.not.be.ok;
 
-					expect(data).to.not.be.ok;
+					expect(body).to.not.be.ok;
 				});
 			});
 
@@ -587,13 +586,13 @@ describe("Using fetch hook", function() {
 				it("should mark status as refetching", function() {
 					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, data } = this.result.current;
+					const { isFetching, isFetched, error, body } = this.result.current;
 
 					expect(isFetching).to.be.true;
 					expect(isFetched).to.be.true;
 					expect(error).to.not.be.ok;
 
-					expect(data).to.deep.equal({ name: "Bob" });
+					expect(body).to.deep.equal({ name: "Bob" });
 				});
 
 				describe("and then waiting enough time for the original reset", function() {
@@ -601,20 +600,20 @@ describe("Using fetch hook", function() {
 						setTimeout(done, 60);
 					});
 
-					it("should not reset data", function() {
+					it("should not reset body", function() {
 						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, data } = this.result.current;
+						const { isFetching, isFetched, error, body } = this.result.current;
 
 						expect(isFetching).to.be.true;
 						expect(isFetched).to.be.true;
 						expect(error).to.not.be.ok;
 
-						expect(data).to.deep.equal({ name: "Bob" });
+						expect(body).to.deep.equal({ name: "Bob" });
 					});
 				});
 
-				describe("and then receiving data and waiting past the original reset time", function() {
+				describe("and then receiving body and waiting past the original reset time", function() {
 					beforeEach(function(done) {
 						this.requests.pop().resolve({
 							status: 200,
@@ -625,16 +624,16 @@ describe("Using fetch hook", function() {
 						setTimeout(done, 60);
 					});
 
-					it("should not reset data", function() {
+					it("should not reset body", function() {
 						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, data } = this.result.current;
+						const { isFetching, isFetched, error, body } = this.result.current;
 
 						expect(isFetching).to.be.false;
 						expect(isFetched).to.be.true;
 						expect(error).to.not.be.ok;
 
-						expect(data).to.deep.equal({ name: "Homer" });
+						expect(body).to.deep.equal({ name: "Homer" });
 					});
 
 					describe("and then waiting for the next reset threshold time", function() {
@@ -642,21 +641,21 @@ describe("Using fetch hook", function() {
 							setTimeout(done, 110);
 						});
 
-						it("should clear the result data", function() {
+						it("should clear the result body", function() {
 							expect(this.result.current).to.be.ok;
 
 							const {
 								isFetching,
 								isFetched,
 								error,
-								data
+								body
 							} = this.result.current;
 
 							expect(isFetching).to.be.false;
 							expect(isFetched).to.be.false;
 							expect(error).to.not.be.ok;
 
-							expect(data).to.not.be.ok;
+							expect(body).to.not.be.ok;
 						});
 					});
 				});
@@ -712,13 +711,13 @@ describe("Using fetch hook", function() {
 				it("should return result", function() {
 					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, data } = this.result.current;
+					const { isFetching, isFetched, error, body } = this.result.current;
 
 					expect(isFetching).to.be.false;
 					expect(isFetched).to.be.true;
 					expect(error).to.not.be.ok;
 
-					expect(data).to.deep.equal({ color: "Yellow" });
+					expect(body).to.deep.equal({ color: "Yellow" });
 				});
 
 				describe("and then waiting the refresh threshold time", function() {
@@ -726,16 +725,16 @@ describe("Using fetch hook", function() {
 						setTimeout(done, 100);
 					});
 
-					it("should mark data as loading without clearing data", function() {
+					it("should mark body as loading without clearing body", function() {
 						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, data } = this.result.current;
+						const { isFetching, isFetched, error, body } = this.result.current;
 
 						expect(isFetching).to.be.true;
 						expect(isFetched).to.be.true;
 						expect(error).to.not.be.ok;
 
-						expect(data).to.deep.equal({ color: "Yellow" });
+						expect(body).to.deep.equal({ color: "Yellow" });
 					});
 				});
 
@@ -750,13 +749,13 @@ describe("Using fetch hook", function() {
 					it("should mark status as refetching", function() {
 						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, data } = this.result.current;
+						const { isFetching, isFetched, error, body } = this.result.current;
 
 						expect(isFetching).to.be.true;
 						expect(isFetched).to.be.true;
 						expect(error).to.not.be.ok;
 
-						expect(data).to.deep.equal({ color: "Yellow" });
+						expect(body).to.deep.equal({ color: "Yellow" });
 					});
 
 					describe("and then waiting enough time for the original refresh", function() {
@@ -770,21 +769,21 @@ describe("Using fetch hook", function() {
 							setTimeout(done, 80);
 						});
 
-						it("should not refresh data", function() {
+						it("should not refresh body", function() {
 							expect(this.result.current).to.be.ok;
 
 							const {
 								isFetching,
 								isFetched,
 								error,
-								data
+								body
 							} = this.result.current;
 
 							expect(isFetching).to.be.false;
 							expect(isFetched).to.be.true;
 							expect(error).to.not.be.ok;
 
-							expect(data).to.deep.equal({ color: "Brown" });
+							expect(body).to.deep.equal({ color: "Brown" });
 						});
 
 						describe("and then waiting for the next refresh time", function() {
@@ -792,21 +791,21 @@ describe("Using fetch hook", function() {
 								setTimeout(done, 110);
 							});
 
-							it("should refresh the data", function() {
+							it("should refresh the body", function() {
 								expect(this.result.current).to.be.ok;
 
 								const {
 									isFetching,
 									isFetched,
 									error,
-									data
+									body
 								} = this.result.current;
 
 								expect(isFetching).to.be.true;
 								expect(isFetched).to.be.true;
 								expect(error).to.not.be.ok;
 
-								expect(data).to.deep.equal({ color: "Brown" });
+								expect(body).to.deep.equal({ color: "Brown" });
 							});
 						});
 					});
@@ -868,16 +867,16 @@ describe("Using fetch hook", function() {
 				expect(this.requests.length).to.equal(0);
 			});
 
-			it("should return empty result data", function() {
+			it("should return empty result body", function() {
 				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, data } = this.result.current;
+				const { isFetching, isFetched, error, body } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.false;
 				expect(error).to.not.be.ok;
 
-				expect(data).to.not.be.ok;
+				expect(body).to.not.be.ok;
 			});
 		}
 

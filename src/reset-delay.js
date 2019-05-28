@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 const useResetDelay = ({
 	resetDelay,
-	setData,
+	setBody,
 	setError,
 	setIsFetched,
 	setIsFetching,
@@ -13,7 +13,7 @@ const useResetDelay = ({
 		if (timerSignal && resetDelay) {
 			timer = setTimeout(() => {
 				// reset the state
-				setData(null);
+				setBody(null);
 				setIsFetching(false);
 				setIsFetched(false);
 				setError(null);
@@ -21,6 +21,6 @@ const useResetDelay = ({
 		}
 
 		return () => timer && clearTimeout(timer);
-	}, [resetDelay, setData, setError, setIsFetched, setIsFetching, timerSignal]);
+	}, [resetDelay, setBody, setError, setIsFetched, setIsFetching, timerSignal]);
 
 export default useResetDelay;

@@ -10,8 +10,8 @@ const useFetchFn = ({
 	setIsFetching,
 	setIsFetched,
 	setError,
-	setData,
-	setResponse
+	setBody,
+	setHeaders
 }) =>
 	useCallback(() => {
 		resetTimer(0);
@@ -25,24 +25,22 @@ const useFetchFn = ({
 		async function doFetch() {
 			try {
 				let _response = await fetch(url, opts);
-				let data;
-				let response = { headers: undefined, body: undefined };
+				let _headers;
+				let _body;
 
 				_response = await checkStatus(_response);
 
-				response.headers = _response.headers;
+				_headers = _response.headers;
 
 				if (_response.status != 204) {
-					data = await _response.json();
-					response.body = data;
+					_body = await _response.json();
 				} else {
 					// for 204 No Content, just return null data
-					data = null;
-					response.body = null;
+					_body = null;
 				}
 
-				setData(data);
-				setResponse(response);
+				setBody(_body);
+				setHeaders(_headers);
 				setIsFetching(false);
 				setIsFetched(true);
 				setError(null);
