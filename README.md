@@ -3,14 +3,14 @@
 > A set of react hooks to work with the fetch API and gracefully parse & deal with HTTP errors.
 
 ```js
-const { isFetching, isFetched, error, data } =
+const { isFetching, isFetched, error, body } =
 		useFetch(`https://api.example.com/`);
 ```
 
 or
 
 ```js
-const { isFetching, isFetched, error, data: result, fetch: saveThing } =
+const { isFetching, isFetched, error, body: result, fetch: saveThing } =
 		useLazyFetch(`https://api.example.com/`, {
 			method: "POST"
 		});
@@ -60,7 +60,7 @@ import React from "react";
 import { useFetch } from "react-fetch-hooks";
 
 const MyBanana = ({ id }) => {
-	const { isFetching, isFetched, error, data: banana } =
+	const { isFetching, isFetched, error, body: banana } =
 		useFetch(`https://api.example.com/bananas/${id}`);
 
 	if (isFetching) {
@@ -76,7 +76,7 @@ const MyBanana = ({ id }) => {
 };
 ```
 
-This will make a `GET` request to `api.example.com` whenever the `id` prop passed to the component changes. It will then return the status of the data being loaded as well as the data when it is ready. The `useFetch` hook takes all the same parameters/options as the [standard fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
+This will make a `GET` request to `api.example.com` whenever the `id` prop passed to the component changes. It will then return the status of the response body being loaded as well as the body itself when it is ready. The `useFetch` hook takes all the same parameters/options as the [standard fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
 
 ### Lazy Evaluation
 
@@ -117,7 +117,7 @@ import React from "react";
 import { useFetch } from "react-fetch-hooks";
 
 const MyBanana = ({ id }) => {
-	const { data: banana } = useFetch({
+	const { body: banana } = useFetch({
 		url: `https://api.example.com/bananas/${id}`,
 		refreshInterval: 10000
 	});
@@ -168,7 +168,7 @@ import React from "react";
 import { useFetch } from "react-fetch-hooks";
 
 const MyBanana = ({ id }) => {
-	const { data: banana } = useFetch(id ? `https://api.example.com/bananas/${id}` : null);
+	const { body: banana } = useFetch(id ? `https://api.example.com/bananas/${id}` : null);
 
 	if (!banana) return null;
 	return <span>My banana is {banana.color}!</span>;
@@ -204,7 +204,7 @@ import React from "react";
 import { useFetch } from "react-fetch-hooks";
 
 const MyBanana = ({ id, authToken = "mytoken" }) => {
-	const { data: banana } = useFetch(`https://api.example.com/bananas/${id}`, {
+	const { body: banana } = useFetch(`https://api.example.com/bananas/${id}`, {
 		bearerToken: authToken
 	});
 

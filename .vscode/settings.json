@@ -1,0 +1,7 @@
+{
+    "mochaExplorer.files": "test/*.js",
+    "mochaExplorer.env": {
+        "BABEL_ENV": "node"
+    },
+    "mochaExplorer.require": ["test/babel-register"]
+}

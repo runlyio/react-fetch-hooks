@@ -9,10 +9,10 @@ export default async function checkStatus(response) {
 }
 
 async function parseJSONError(response) {
-	let data;
+	let _body;
 
 	try {
-		data = await response.json();
+		_body = await response.json();
 	} catch {
 		// there was an error trying to parse the JSON body (maybe it's not JSON?)
 		// just ignore it and return an error with the original response without a parsed body
@@ -24,7 +24,7 @@ async function parseJSONError(response) {
 		throw error;
 	}
 
-	let msg = extractErrorMessage(data);
+	let msg = extractErrorMessage(_body);
 	if (!msg) msg = response.statusText;
 
 	let error = new Error(msg);
@@ -32,7 +32,7 @@ async function parseJSONError(response) {
 		status: response.status,
 		type: response.type,
 		url: response.url,
-		body: data
+		body: _body
 	};
 
 	throw error;
