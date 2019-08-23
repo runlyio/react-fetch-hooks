@@ -81,7 +81,7 @@ function parseArguments(args) {
 		}
 
 		throw new Error(
-			"The fetch hook only takes one or two arguments. See usage instructions: https://github.com/civicsource/react-fetch-hooks/blob/master/README.md"
+			"The fetch hook only takes one or two arguments. See usage instructions: https://github.com/chadly/react-fetch-hooks/blob/master/README.md"
 		);
 	}
 
