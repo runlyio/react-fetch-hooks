@@ -1,12 +1,11 @@
 import { expect } from "chai";
 import behavesLikeBrowser from "./behaves-like-browser";
 
-import { renderHook, cleanup } from "react-hooks-testing-library";
+import { renderHook } from "@testing-library/react-hooks";
 
 import { useFetch, useLazyFetch } from "../src";
 
 describe("Using fetch hook", function() {
-	afterEach(cleanup);
 	behavesLikeBrowser();
 
 	describe("when rendering a component with just a URL", function() {
