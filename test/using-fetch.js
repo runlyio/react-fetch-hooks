@@ -522,6 +522,42 @@ describe("Using fetch hook", function() {
 		});
 	});
 
+	describe("when rendering a component with a lazy function and passing the body as a parameter", function() {
+		beforeEach(function(done) {
+			const r = renderHook(() =>
+				useLazyFetch(`http://example.com/api/bananas/`, {
+					method: "POST"
+				})
+			);
+			this.result = r.result;
+			this.rerender = r.rerender;
+
+			setTimeout(done, 10);
+		});
+
+		it("should not make a fetch API request", function() {
+			expect(this.requests.length).to.equal(0);
+		});
+
+		describe("and then invoking the lazy function with a parameter", function() {
+			beforeEach(function(done) {
+				this.result.current.fetch({ name: "Homer" });
+
+				setTimeout(done, 10);
+			});
+
+			it("should make a fetch API request", function() {
+				expect(this.requests.length).to.equal(1);
+
+				const req = this.requests[0];
+
+				expect(req.url).to.equal("http://example.com/api/bananas/");
+				expect(req.method).to.equal("POST");
+				expect(req.body).to.equal('{"name":"Homer"}');
+			});
+		});
+	});
+
 	describe("when rendering a component with a reset", function() {
 		function behavesLikeTestingReset(useHook, triggerFetch) {
 			beforeEach(function(done) {

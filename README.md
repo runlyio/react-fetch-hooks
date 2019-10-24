@@ -100,6 +100,33 @@ const BananaEditor = ({ color }) => {
 
 This will not invoke the fetch until the button is clicked.
 
+Or, if you want the request body to come from the lazy function's parameters:
+
+```js
+import React from "react";
+import { useLazyFetch } from "react-fetch-hooks";
+
+const BananaEditor = ({ color }) => {
+	const { isFetching: isSaving, error, fetch: saveBanana } =
+		useLazyFetch({
+			url: "https://api.example.com/bananas/",
+			method: "POST"
+		});
+
+	if (isSaving) {
+		return <span>Saving...</span>;
+	}
+
+	if (error) {
+		return <span>Some shit broke: {error}</span>;
+	}
+
+	return <button onClick={() => saveBanana({ color })}>Save new banana with color: {color}</button>;
+};
+```
+
+This is equivalent to the example above except the request body is provided to the lazy function rather than at the time of hook creation.
+
 ### Polling on an Interval
 
 You can pass a `refreshInterval` parameter to any of the fetch hooks to refresh the data (do the fetch again) after a certain amount of time has passed. This could be useful to poll the server changes on a set interval:
