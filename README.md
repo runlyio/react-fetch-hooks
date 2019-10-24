@@ -23,16 +23,8 @@ See more [in-depth examples](#examples).
 
 ## Install
 
-Install with [Yarn](https://yarnpkg.com/en/):
-
 ```
-yarn add react-fetch-hooks
-```
-
-or if Yarn isn't your thing:
-
-```
-npm install react-fetch-hooks --save
+npm install react-fetch-hooks
 ```
 
 This library makes use of and assumes the [`fetch` API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) is available on the global scope. You will need to polyfill it if it is not available in the current environment.
@@ -250,8 +242,8 @@ It will try to look for a `message` field first, and then an `exceptionMessage` 
 After cloning this repo, run:
 
 ```
-yarn
-yarn lint
-yarn test
-yarn compile
+npm install
+npm run lint
+npm test
+npm run compile
 ```
