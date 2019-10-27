@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import checkStatus from "./check-status";
+import { isFunction } from "lodash";
 
 const useFetchFn = ({
 	refreshInterval,
@@ -25,10 +26,9 @@ const useFetchFn = ({
 
 			async function doFetch() {
 				try {
-					let _response = await fetch(
-						url,
-						reqBody ? { ...opts, body: JSON.stringify(reqBody) } : opts
-					);
+					const parsedOpts = await prepareHeaders(opts, reqBody);
+
+					let _response = await fetch(url, parsedOpts);
 
 					let _headers;
 					let _body;
@@ -67,5 +67,40 @@ const useFetchFn = ({
 		// https://github.com/facebook/react/issues/14476#issuecomment-471199055
 		[refreshInterval, resetDelay, url, JSON.stringify(opts)] // eslint-disable-line react-hooks/exhaustive-deps
 	);
+
+async function prepareHeaders(itemToFetch, reqBody) {
+	let { bearerToken, ...opts } = itemToFetch || {};
+
+	let { headers, ...otherOpts } = opts;
+	headers = headers || {};
+
+	if (!headers["Accept"]) {
+		headers["Accept"] = "application/json";
+	}
+
+	if (!headers["Content-Type"]) {
+		headers["Content-Type"] = "application/json";
+	}
+
+	if (bearerToken) {
+		if (isFunction(bearerToken)) {
+			bearerToken = bearerToken();
+		}
+
+		bearerToken = await Promise.resolve(bearerToken);
+		headers["Authorization"] = `Bearer ${bearerToken}`;
+	}
+
+	const result = {
+		headers,
+		...otherOpts
+	};
+
+	if (reqBody) {
+		result.body = JSON.stringify(reqBody);
+	}
+
+	return result;
+}
 
 export default useFetchFn;

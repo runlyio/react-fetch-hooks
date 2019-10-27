@@ -67,7 +67,11 @@ const useLazyFetch = (...args) => {
 function parseArguments(args) {
 	if (args) {
 		if (args.length == 1) {
-			return prepareHeaders(args[0]);
+			if (isString(args[0])) {
+				return { url: args[0] };
+			}
+
+			return args[0] || {};
 		}
 
 		if (args.length == 2) {
@@ -77,7 +81,7 @@ function parseArguments(args) {
 				);
 			}
 
-			return prepareHeaders({ ...args[1], url: args[0] });
+			return { ...args[1], url: args[0] };
 		}
 
 		throw new Error(
@@ -86,44 +90,6 @@ function parseArguments(args) {
 	}
 
 	return {};
-}
-
-function prepareHeaders(itemToFetch) {
-	let url,
-		bearerToken,
-		opts = {};
-
-	if (isString(itemToFetch)) {
-		url = itemToFetch;
-	} else {
-		const { url: _url, bearerToken: _bearerToken, ..._opts } =
-			itemToFetch || {};
-		url = _url;
-		bearerToken = _bearerToken;
-		opts = _opts;
-	}
-
-	let { headers, ...otherOpts } = opts;
-	headers = headers || {};
-
-	if (!headers["Accept"]) {
-		headers["Accept"] = "application/json";
-	}
-
-	if (!headers["Content-Type"]) {
-		headers["Content-Type"] = "application/json";
-	}
-
-	if (bearerToken) {
-		headers["Authorization"] = `Bearer ${bearerToken}`;
-	}
-
-	return {
-		url,
-		bearerToken,
-		headers,
-		...otherOpts
-	};
 }
 
 export default useLazyFetch;

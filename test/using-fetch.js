@@ -374,6 +374,127 @@ describe("Using fetch hook", function() {
 		});
 	});
 
+	describe("when rendering a component with an async bearer token", function() {
+		beforeEach(function(done) {
+			const promise = new Promise((resolve, reject) => {
+				this.resolve = resolve;
+				this.reject = reject;
+			});
+
+			const r = renderHook(() =>
+				useFetch({
+					url: `http://example.com/api/bananas/`,
+					bearerToken: promise
+				})
+			);
+			this.result = r.result;
+
+			setTimeout(done, 10);
+		});
+
+		it("should not make a request", function() {
+			expect(this.requests).to.be.empty;
+		});
+
+		describe("and then resolving the promise", function() {
+			beforeEach(function(done) {
+				this.resolve("poop");
+				setTimeout(done, 10);
+			});
+
+			it("should make the request and set authorization header", function() {
+				expect(this.requests).to.have.lengthOf(1);
+
+				const req = this.requests[0];
+
+				expect(req.headers).to.be.ok;
+				expect(req.headers["Authorization"]).to.equal("Bearer poop");
+			});
+		});
+
+		describe("and then rejecting the promise", function() {
+			beforeEach(function(done) {
+				this.err = new Error("some shit broke");
+				this.reject(this.err);
+				setTimeout(done, 10);
+			});
+
+			it("should not make the request", function() {
+				expect(this.requests).to.be.empty;
+			});
+
+			it("should mark the fetch as errored", function() {
+				expect(this.result.current).to.be.ok;
+
+				const { isFetching, isFetched, error } = this.result.current;
+
+				expect(isFetching).to.be.false;
+				expect(isFetched).to.be.false;
+				expect(error).to.equal(this.err);
+			});
+		});
+	});
+
+	describe("when rendering a component with a functional bearer token", function() {
+		beforeEach(function(done) {
+			renderHook(() =>
+				useFetch({
+					url: `http://example.com/api/bananas/`,
+					bearerToken: () => "poop"
+				})
+			);
+
+			setTimeout(done, 10);
+		});
+
+		it("should make the request and set authorization header", function() {
+			expect(this.requests).to.have.lengthOf(1);
+
+			const req = this.requests[0];
+
+			expect(req.headers).to.be.ok;
+			expect(req.headers["Authorization"]).to.equal("Bearer poop");
+		});
+	});
+
+	describe("when rendering a component with an async functional bearer token", function() {
+		beforeEach(function(done) {
+			const promise = new Promise((resolve, reject) => {
+				this.resolve = resolve;
+				this.reject = reject;
+			});
+
+			renderHook(() =>
+				useFetch({
+					url: `http://example.com/api/bananas/`,
+					bearerToken: () => promise
+				})
+			);
+
+			setTimeout(done, 10);
+		});
+
+		it("should not make a request", function() {
+			expect(this.requests).to.be.empty;
+		});
+
+		describe("and then resolving the promise", function() {
+			beforeEach(function(done) {
+				this.resolve("poop");
+				setTimeout(done, 10);
+			});
+
+			it("should make the request and set authorization header", function() {
+				expect(this.requests).to.have.lengthOf(1);
+
+				const req = this.requests[0];
+
+				expect(req.headers).to.be.ok;
+				expect(req.headers["Authorization"]).to.equal("Bearer poop");
+			});
+		});
+	});
+
 	describe("when rendering a component with specific headers", function() {
 		beforeEach(function(done) {
 			renderHook(() =>
