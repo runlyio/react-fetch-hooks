@@ -232,7 +232,7 @@ const MyBanana = ({ id, authToken = "mytoken" }) => {
 };
 ```
 
-This will make a `GET` request adding an `Authorization` header with the value `Bearer mytoken`.
+This will make a `GET` request adding an `Authorization` header with the value `Bearer mytoken`. `bearerToken` can also be a `Promise`, a `function`, or a `function` that returns a `Promise` (an `async function`) and the hook will wait for the `bearerToken` to resolve before making the request.
 
 ## Utility Functions
 
