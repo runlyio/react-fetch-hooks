@@ -8,17 +8,16 @@ import useResetDelay from "./reset-delay";
 const useLazyFetch = (...args) => {
 	const {
 		isFetching,
-		setIsFetching,
 		isFetched,
-		setIsFetched,
 		body,
-		setBody,
 		headers,
-		setHeaders,
 		error,
-		setError,
 		timerSignal,
-		resetTimer
+		onTimerReset,
+		onStartFetch,
+		onFetchResults,
+		onFetchFail,
+		onResetResults
 	} = useRequestState();
 
 	let { url, resetDelay, refreshInterval, ...opts } = parseArguments(args);
@@ -34,22 +33,16 @@ const useLazyFetch = (...args) => {
 		resetDelay,
 		url,
 		opts,
-		resetTimer,
-		setIsFetching,
-		setIsFetched,
-		setError,
-		setBody,
-		setHeaders
+		onTimerReset,
+		onStartFetch,
+		onFetchResults,
+		onFetchFail
 	});
 
 	useResetDelay({
 		resetDelay,
-		setBody,
-		setHeaders,
-		setError,
-		setIsFetched,
-		setIsFetching,
-		timerSignal
+		timerSignal,
+		onResetResults
 	});
 
 	useRefreshInterval({ timerSignal, refreshInterval, fetchFn });

@@ -7,21 +7,18 @@ const useFetchFn = ({
 	resetDelay,
 	url,
 	opts,
-	resetTimer,
-	setIsFetching,
-	setIsFetched,
-	setError,
-	setBody,
-	setHeaders
+	onTimerReset,
+	onStartFetch,
+	onFetchResults,
+	onFetchFail
 }) =>
 	useCallback(
 		reqBody => {
-			resetTimer(0);
-
 			if (url) {
-				setIsFetching(true);
-				setError(null);
+				onStartFetch();
 				doFetch();
+			} else {
+				onTimerReset();
 			}
 
 			async function doFetch() {
@@ -44,22 +41,13 @@ const useFetchFn = ({
 						_body = null;
 					}
 
-					setBody(_body);
-					setHeaders(_headers);
-					setIsFetching(false);
-					setIsFetched(true);
-					setError(null);
-
-					if (resetDelay) {
-						resetTimer(s => s + 1);
-					}
-
-					if (refreshInterval) {
-						resetTimer(s => s + 1);
-					}
+					onFetchResults({
+						body: _body,
+						headers: _headers,
+						timer: resetDelay || refreshInterval
+					});
 				} catch (ex) {
-					setIsFetching(false);
-					setError(ex);
+					onFetchFail(ex);
 				}
 			}
 		},

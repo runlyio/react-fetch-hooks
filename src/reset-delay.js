@@ -1,36 +1,16 @@
 import { useEffect } from "react";
 
-const useResetDelay = ({
-	resetDelay,
-	setBody,
-	setHeaders,
-	setError,
-	setIsFetched,
-	setIsFetching,
-	timerSignal
-}) =>
+const useResetDelay = ({ resetDelay, timerSignal, onResetResults }) =>
 	useEffect(() => {
 		let timer;
 		if (timerSignal && resetDelay) {
 			timer = setTimeout(() => {
 				// reset the state
-				setBody(null);
-				setHeaders(null);
-				setIsFetching(false);
-				setIsFetched(false);
-				setError(null);
+				onResetResults();
 			}, resetDelay);
 		}
 
 		return () => timer && clearTimeout(timer);
-	}, [
-		resetDelay,
-		setBody,
-		setHeaders,
-		setError,
-		setIsFetched,
-		setIsFetching,
-		timerSignal
-	]);
+	}, [onResetResults, resetDelay, timerSignal]);
 
 export default useResetDelay;
