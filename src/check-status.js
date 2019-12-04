@@ -30,6 +30,7 @@ async function parseJSONError(response) {
 	let error = new Error(msg);
 	error.response = {
 		status: response.status,
+		headers: response.headers,
 		type: response.type,
 		url: response.url,
 		body: _body

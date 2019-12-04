@@ -101,8 +101,12 @@ describe("Using fetch hook", function() {
 				this.requests.pop().resolve({
 					status: 500,
 					statusText: "OK",
+					headers: {
+						"Content-Type": "application/json"
+					},
 					json: async () => ({
-						message: "Not today, buddy"
+						message: "Not today, buddy",
+						otherShit: 42
 					})
 				});
 
@@ -112,7 +116,7 @@ describe("Using fetch hook", function() {
 			it("should return results as errored", function() {
 				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, body } = this.result.current;
+				const { isFetching, isFetched, error } = this.result.current;
 
 				expect(isFetching).to.be.false;
 				expect(isFetched).to.be.false;
@@ -123,8 +127,23 @@ describe("Using fetch hook", function() {
 				expect(error.message).to.equal("Not today, buddy");
 				expect(error.response).to.be.ok;
 				expect(error.response.status).to.equal(500);
+			});
 
-				expect(body).to.not.be.ok;
+			it("should return headers", function() {
+				const { headers } = this.result.current;
+
+				expect(headers).to.deep.equal({
+					"Content-Type": "application/json"
+				});
+			});
+
+			it("should return body", function() {
+				const { body } = this.result.current;
+
+				expect(body).to.deep.equal({
+					message: "Not today, buddy",
+					otherShit: 42
+				});
 			});
 
 			describe("and then setting setting arbitrary props on the component", function() {
@@ -297,7 +316,9 @@ describe("Using fetch hook", function() {
 				expect(error.response).to.be.ok;
 				expect(error.response.status).to.equal(500);
 
-				expect(body).to.not.be.ok;
+				expect(body).to.deep.equal({
+					message: "Not today, buddy"
+				});
 			});
 
 			describe("and then setting a keyed prop on the component", function() {
@@ -317,11 +338,17 @@ describe("Using fetch hook", function() {
 				it("should return result as fetching and no longer errored", function() {
 					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, body } = this.result.current;
+					const { isFetching, isFetched, error } = this.result.current;
 
 					expect(isFetching).to.be.true;
 					expect(isFetched).to.be.false;
 					expect(error).to.not.be.ok;
+				});
+
+				it("should clear out error body", function() {
+					expect(this.result.current).to.be.ok;
+
+					const { body } = this.result.current;
 
 					expect(body).to.not.be.ok;
 				});

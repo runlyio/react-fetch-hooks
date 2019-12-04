@@ -7,8 +7,18 @@ const useRequestInitialState = () => {
 				case "reset-timer":
 					return { ...state, timerSignal: 0 };
 
-				case "start-fetch":
-					return { ...state, timerSignal: 0, isFetching: true, error: null };
+				case "start-fetch": {
+					// clear the body, but only when refetching after error
+					const body = !state.error ? state.body : null;
+
+					return {
+						...state,
+						timerSignal: 0,
+						isFetching: true,
+						error: null,
+						body
+					};
+				}
 
 				case "results": {
 					const { headers, body, timer } = action.payload;
@@ -30,7 +40,13 @@ const useRequestInitialState = () => {
 				}
 
 				case "fail":
-					return { ...state, isFetching: false, error: action.payload };
+					return {
+						...state,
+						isFetching: false,
+						error: action.payload,
+						headers: action.payload?.response?.headers,
+						body: action.payload?.response?.body
+					};
 
 				case "reset":
 					return {
