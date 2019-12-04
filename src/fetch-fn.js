@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import checkStatus from "./check-status";
 import { isFunction } from "lodash";
+import pojoHeaders from "./pojo-headers";
 
 const useFetchFn = ({
 	refreshInterval,
@@ -32,7 +33,7 @@ const useFetchFn = ({
 
 					_response = await checkStatus(_response);
 
-					_headers = _response.headers;
+					_headers = pojoHeaders(_response.headers);
 
 					if (_response.status != 204) {
 						_body = await _response.json();

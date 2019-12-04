@@ -1,4 +1,5 @@
 import extractErrorMessage from "./extract-error-message";
+import pojoHeaders from "./pojo-headers";
 
 export default async function checkStatus(response) {
 	if (response.status >= 200 && response.status < 300) {
@@ -20,7 +21,8 @@ async function parseJSONError(response) {
 			response.statusText ||
 				`Request failed with status code ${response.status}`
 		);
-		error.response = response;
+
+		error.response = pojoResponse(response);
 		throw error;
 	}
 
@@ -28,13 +30,17 @@ async function parseJSONError(response) {
 	if (!msg) msg = response.statusText;
 
 	let error = new Error(msg);
-	error.response = {
-		status: response.status,
-		headers: response.headers,
-		type: response.type,
-		url: response.url,
-		body: _body
-	};
+	error.response = pojoResponse(response, _body);
 
 	throw error;
+}
+
+function pojoResponse(response, body) {
+	return {
+		status: response.status,
+		headers: pojoHeaders(response.headers),
+		type: response.type,
+		url: response.url,
+		body: body
+	};
 }
