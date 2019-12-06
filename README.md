@@ -234,36 +234,6 @@ const MyBanana = ({ id, authToken = "mytoken" }) => {
 
 This will make a `GET` request adding an `Authorization` header with the value `Bearer mytoken`. `bearerToken` can also be a `Promise`, a `function`, or a `function` that returns a `Promise` (an `async function`) and the hook will wait for the `bearerToken` to resolve before making the request.
 
-## Utility Functions
-
-The package includes some other utility functions that can be used outside the context of a hook.
-
-### `checkStatus(response)`
-
-[Read here](https://github.com/github/fetch#handling-http-error-statuses) for the inspiration for this function. It will reject fetch requests on any non-2xx response. It differs from the example in that it will try to parse a JSON body from the non-200 response and will set any `message` field (if it exists) from the JSON body as the error message. The fetch hooks use this internally.
-
-```js
-import { checkStatus } from "react-fetch-hooks";
-
-//given a 400 Bad Request response with a JSON body of:
-//{ "message": "Invalid arguments. Try again.", "someOtherThing": 42 }
-
-fetch("/data", {
-	method: "GET",
-	headers: {
-		Accept: "application/json"
-	}
-})
-.then(checkStatus)
-.catch(err => {
-	console.log(err.message); //Invalid Arguments. Try again.
-	console.log(err.response.statusText); //Bad Request
-	console.log(err.response.jsonBody); //{ "message": "Invalid arguments. Try again.", "someOtherThing": 42 }
-});
-```
-
-It will try to look for a `message` field first, and then an `exceptionMessage` falling back to the `statusText` if neither one exist or if the response body is not JSON.
-
 ## Build/Run Locally
 
 After cloning this repo, run:

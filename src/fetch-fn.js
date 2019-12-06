@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import checkStatus from "./check-status";
 import { isFunction } from "lodash";
 import pojoHeaders from "./pojo-headers";
+import extractErrorMessage from "./extract-error-message";
 
 const useFetchFn = ({
 	refreshInterval,
@@ -23,34 +23,40 @@ const useFetchFn = ({
 			}
 
 			async function doFetch() {
-				let _headers, _body, _status, _statusText;
+				let response, headers, body, status, statusText;
 
 				try {
 					const parsedOpts = await prepareHeaders(opts, reqBody);
 
-					let _response = await fetch(url, parsedOpts);
-					_headers = pojoHeaders(_response.headers);
-					_status = _response.status;
-					_statusText = _response.statusText;
+					response = await fetch(url, parsedOpts);
 
-					_response = await checkStatus(_response);
+					headers = pojoHeaders(response.headers);
+					status = response.status;
+					statusText = response.statusText;
 
-					if (_status != 204) {
-						_body = await _response.json();
+					const isSuccessful = response.status >= 200 && response.status < 300;
+
+					if (isSuccessful) {
+						if (status != 204) {
+							body = await response.json();
+						} else {
+							// for 204 No Content, just return null data
+							body = null;
+						}
+
+						onFetchResults({
+							body: body,
+							headers: headers,
+							status: status,
+							statusText: statusText,
+							timer: resetDelay || refreshInterval
+						});
 					} else {
-						// for 204 No Content, just return null data
-						_body = null;
+						const parsedResult = await parseJSONError(response);
+						onFetchFail({ ...parsedResult, headers, status, statusText });
 					}
-
-					onFetchResults({
-						body: _body,
-						headers: _headers,
-						status: _status,
-						statusText: _statusText,
-						timer: resetDelay || refreshInterval
-					});
 				} catch (ex) {
-					onFetchFail(ex);
+					onFetchFail({ error: ex, body, headers, status, statusText });
 				}
 			}
 		},
@@ -58,6 +64,32 @@ const useFetchFn = ({
 		// https://github.com/facebook/react/issues/14476#issuecomment-471199055
 		[refreshInterval, resetDelay, url, JSON.stringify(opts)] // eslint-disable-line react-hooks/exhaustive-deps
 	);
+
+async function parseJSONError(response) {
+	let body;
+
+	try {
+		body = await response.json();
+	} catch {
+		// there was an error trying to parse the JSON body (maybe it's not JSON?)
+		// just ignore it and return an error with the original response without a parsed body
+		let error = new Error(
+			response.statusText ||
+				`Request failed with status code ${response.status}`
+		);
+
+		error.response = response;
+		return { error };
+	}
+
+	let msg = extractErrorMessage(body);
+	if (!msg) msg = response.statusText;
+
+	let error = new Error(msg);
+	error.response = response;
+
+	return { error, body };
+}
 
 async function prepareHeaders(itemToFetch, reqBody) {
 	let { bearerToken, ...opts } = itemToFetch || {};

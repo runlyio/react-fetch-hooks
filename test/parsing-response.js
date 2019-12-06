@@ -1,20 +1,24 @@
 import { expect } from "chai";
+import behavesLikeBrowser from "./behaves-like-browser";
 
-import { checkStatus } from "../src";
+import { renderHook } from "@testing-library/react-hooks";
+
+import { useFetch } from "../src";
 
 describe("Parsing Responses", function() {
-	beforeEach(function() {
-		this.result = new Promise((resolve, reject) => {
-			this.resolve = resolve;
-			this.reject = reject;
-		})
-			.then(checkStatus)
-			.then(r => r.json());
+	behavesLikeBrowser();
+
+	beforeEach(function(done) {
+		const r = renderHook(() => useFetch("https://example.com/"));
+		this.result = r.result;
+		this.rerender = r.rerender;
+
+		setTimeout(done, 10);
 	});
 
 	describe("when parsing a 200-level response", function() {
-		beforeEach(function() {
-			this.resolve({
+		beforeEach(function(done) {
+			this.requests.pop().resolve({
 				status: 200,
 				statusText: "OK",
 				json: () =>
@@ -25,56 +29,51 @@ describe("Parsing Responses", function() {
 						})
 					)
 			});
+
+			setTimeout(done, 10);
 		});
 
-		it("should parse the response json as a successful result", function(done) {
-			this.result.then(user => {
-				expect(user).to.be.ok;
-				expect(user.username).to.equal("homer.simpson");
-				expect(user.age).to.equal(42);
+		it("should parse the response json as a successful result", function() {
+			const { body } = this.result.current;
 
-				done();
-			});
+			expect(body).to.be.ok;
+			expect(body.username).to.equal("homer.simpson");
+			expect(body.age).to.equal(42);
 		});
 	});
 
 	describe("when parsing a non-200-level response", function() {
-		function shouldRejectWithError(statusCode) {
-			it("should reject the promise with an error", function(done) {
-				this.result.catch(err => {
-					expect(err).to.be.ok;
-					expect(err).to.be.an("error");
-					done();
-				});
+		function shouldRejectWithError() {
+			it("should return an error", function() {
+				const { error } = this.result.current;
+				expect(error).to.be.ok;
+				expect(error).to.be.an("error");
 			});
 
-			it("should include the original response with the error", function(done) {
-				this.result.catch(err => {
-					expect(err.response).to.be.ok;
-					expect(err.response.status).to.equal(statusCode);
-					done();
-				});
+			it("should include the original response with the error", function() {
+				const { error } = this.result.current;
+				expect(error.response).to.equal(this.response);
 			});
 		}
 
 		describe("with no error message or status text", function() {
-			beforeEach(function() {
-				this.resolve({ status: 404 });
+			beforeEach(function(done) {
+				this.response = { status: 404 };
+				this.requests.pop().resolve(this.response);
+				setTimeout(done, 10);
 			});
 
-			shouldRejectWithError(404);
+			shouldRejectWithError();
 
-			it("should use a generic error message", function(done) {
-				this.result.catch(err => {
-					expect(err.message).to.equal("Request failed with status code 404");
-					done();
-				});
+			it("should use a generic error message", function() {
+				const { error } = this.result.current;
+				expect(error.message).to.equal("Request failed with status code 404");
 			});
 		});
 
 		describe("with an error message", function() {
-			beforeEach(function() {
-				this.resolve({
+			beforeEach(function(done) {
+				this.response = {
 					status: 404,
 					statusText: "Not Found",
 					json: () =>
@@ -83,22 +82,23 @@ describe("Parsing Responses", function() {
 								message: "Couldn't find the dude, man"
 							})
 						)
-				});
+				};
+				this.requests.pop().resolve(this.response);
+
+				setTimeout(done, 10);
 			});
 
-			shouldRejectWithError(404);
+			shouldRejectWithError();
 
-			it("should parse the error message from the response", function(done) {
-				this.result.catch(err => {
-					expect(err.message).to.equal("Couldn't find the dude, man");
-					done();
-				});
+			it("should parse the error message from the response", function() {
+				const { error } = this.result.current;
+				expect(error.message).to.equal("Couldn't find the dude, man");
 			});
 		});
 
 		describe("with a pascal-cased error message", function() {
-			beforeEach(function() {
-				this.resolve({
+			beforeEach(function(done) {
+				this.response = {
 					status: 400,
 					statusText: "Bad Request",
 					json: () =>
@@ -107,41 +107,43 @@ describe("Parsing Responses", function() {
 								Message: "shiitake mushrooms"
 							})
 						)
-				});
+				};
+				this.requests.pop().resolve(this.response);
+
+				setTimeout(done, 10);
 			});
 
-			shouldRejectWithError(400);
+			shouldRejectWithError();
 
-			it("should parse the error message from the response", function(done) {
-				this.result.catch(err => {
-					expect(err.message).to.equal("shiitake mushrooms");
-					done();
-				});
+			it("should parse the error message from the response", function() {
+				const { error } = this.result.current;
+				expect(error.message).to.equal("shiitake mushrooms");
 			});
 		});
 
 		describe("without an error message", function() {
-			beforeEach(function() {
-				this.resolve({
+			beforeEach(function(done) {
+				this.response = {
 					status: 301,
 					statusText: "Moved Permanently",
 					json: () => new Promise(resolve => resolve({}))
-				});
+				};
+				this.requests.pop().resolve(this.response);
+
+				setTimeout(done, 10);
 			});
 
-			shouldRejectWithError(301);
+			shouldRejectWithError();
 
-			it("should use the status text as the error message", function(done) {
-				this.result.catch(err => {
-					expect(err.message).to.equal("Moved Permanently");
-					done();
-				});
+			it("should use the status text as the error message", function() {
+				const { error } = this.result.current;
+				expect(error.message).to.equal("Moved Permanently");
 			});
 		});
 
 		describe("with a .net exception message", function() {
-			beforeEach(function() {
-				this.resolve({
+			beforeEach(function(done) {
+				this.response = {
 					status: 500,
 					statusText: "Server Error",
 					json: () =>
@@ -154,24 +156,25 @@ describe("Parsing Responses", function() {
 								stackTrace: "bla bla bla"
 							})
 						)
-				});
+				};
+				this.requests.pop().resolve(this.response);
+
+				setTimeout(done, 10);
 			});
 
-			shouldRejectWithError(500);
+			shouldRejectWithError();
 
-			it("should use the exception message as the error message", function(done) {
-				this.result.catch(err => {
-					expect(err.message).to.equal(
-						"Cannot do the thing you wanted to do because of some important reason."
-					);
-					done();
-				});
+			it("should use the exception message as the error message", function() {
+				const { error } = this.result.current;
+				expect(error.message).to.equal(
+					"Cannot do the thing you wanted to do because of some important reason."
+				);
 			});
 		});
 
 		describe("with a pascal-cased .net exception message", function() {
-			beforeEach(function() {
-				this.resolve({
+			beforeEach(function(done) {
+				this.response = {
 					status: 500,
 					statusText: "Server Error",
 					json: () =>
@@ -184,24 +187,25 @@ describe("Parsing Responses", function() {
 								StackTrace: "bla bla bla"
 							})
 						)
-				});
+				};
+				this.requests.pop().resolve(this.response);
+
+				setTimeout(done, 10);
 			});
 
-			shouldRejectWithError(500);
+			shouldRejectWithError();
 
-			it("should use the exception message as the error message", function(done) {
-				this.result.catch(err => {
-					expect(err.message).to.equal(
-						"Cannot do the thing you wanted to do because of some important reason."
-					);
-					done();
-				});
+			it("should use the exception message as the error message", function() {
+				const { error } = this.result.current;
+				expect(error.message).to.equal(
+					"Cannot do the thing you wanted to do because of some important reason."
+				);
 			});
 		});
 
 		describe("with a nested .net exception message", function() {
-			beforeEach(function() {
-				this.resolve({
+			beforeEach(function(done) {
+				this.response = {
 					status: 500,
 					statusText: "Server Error",
 					json: () =>
@@ -226,24 +230,25 @@ describe("Parsing Responses", function() {
 								}
 							})
 						)
-				});
+				};
+				this.requests.pop().resolve(this.response);
+
+				setTimeout(done, 10);
 			});
 
-			shouldRejectWithError(500);
+			shouldRejectWithError();
 
-			it("should use the inner-most exception message as the error message", function(done) {
-				this.result.catch(err => {
-					expect(err.message).to.equal(
-						"Cannot do the thing you wanted to do because of some important reason."
-					);
-					done();
-				});
+			it("should use the inner-most exception message as the error message", function() {
+				const { error } = this.result.current;
+				expect(error.message).to.equal(
+					"Cannot do the thing you wanted to do because of some important reason."
+				);
 			});
 		});
 
 		describe("with a nested .net exception message with varying detail", function() {
-			beforeEach(function() {
-				this.resolve({
+			beforeEach(function(done) {
+				this.response = {
 					status: 500,
 					statusText: "Server Error",
 					json: () =>
@@ -266,22 +271,23 @@ describe("Parsing Responses", function() {
 								}
 							})
 						)
-				});
+				};
+				this.requests.pop().resolve(this.response);
+
+				setTimeout(done, 10);
 			});
 
-			shouldRejectWithError(500);
+			shouldRejectWithError();
 
-			it("should use the inner-most exception message as the error message", function(done) {
-				this.result.catch(err => {
-					expect(err.message).to.equal("Cannot do the thing");
-					done();
-				});
+			it("should use the inner-most exception message as the error message", function() {
+				const { error } = this.result.current;
+				expect(error.message).to.equal("Cannot do the thing");
 			});
 		});
 
 		describe("with a nested malformed .net exception message", function() {
-			beforeEach(function() {
-				this.resolve({
+			beforeEach(function(done) {
+				this.response = {
 					status: 500,
 					statusText: "Server Error",
 					json: () =>
@@ -304,16 +310,17 @@ describe("Parsing Responses", function() {
 								}
 							})
 						)
-				});
+				};
+				this.requests.pop().resolve(this.response);
+
+				setTimeout(done, 10);
 			});
 
-			shouldRejectWithError(500);
+			shouldRejectWithError();
 
-			it("should use the inner-most exception message as the error message", function(done) {
-				this.result.catch(err => {
-					expect(err.message).to.equal("Not a useless message");
-					done();
-				});
+			it("should use the inner-most exception message as the error message", function() {
+				const { error } = this.result.current;
+				expect(error.message).to.equal("Not a useless message");
 			});
 		});
 	});

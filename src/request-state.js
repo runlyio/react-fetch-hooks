@@ -51,11 +51,11 @@ const useRequestInitialState = () => {
 					return {
 						...state,
 						isFetching: false,
-						error: action.payload,
-						headers: action.payload?.response?.headers,
-						body: action.payload?.response?.body,
-						status: action.payload?.response?.status,
-						statusText: action.payload?.response?.statusText
+						error: action.payload.error,
+						headers: action.payload.headers,
+						body: action.payload.body,
+						status: action.payload.status,
+						statusText: action.payload.statusText
 					};
 
 				case "reset":
