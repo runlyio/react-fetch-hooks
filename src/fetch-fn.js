@@ -23,19 +23,19 @@ const useFetchFn = ({
 			}
 
 			async function doFetch() {
+				let _headers, _body, _status, _statusText;
+
 				try {
 					const parsedOpts = await prepareHeaders(opts, reqBody);
 
 					let _response = await fetch(url, parsedOpts);
-
-					let _headers;
-					let _body;
+					_headers = pojoHeaders(_response.headers);
+					_status = _response.status;
+					_statusText = _response.statusText;
 
 					_response = await checkStatus(_response);
 
-					_headers = pojoHeaders(_response.headers);
-
-					if (_response.status != 204) {
+					if (_status != 204) {
 						_body = await _response.json();
 					} else {
 						// for 204 No Content, just return null data
@@ -45,6 +45,8 @@ const useFetchFn = ({
 					onFetchResults({
 						body: _body,
 						headers: _headers,
+						status: _status,
+						statusText: _statusText,
 						timer: resetDelay || refreshInterval
 					});
 				} catch (ex) {

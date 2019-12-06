@@ -1,6 +1,6 @@
 {
   "name": "react-fetch-hooks",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "A set of react hooks to work with the fetch API and gracefully parse & deal with HTTP errors",
   "keywords": [
     "react",

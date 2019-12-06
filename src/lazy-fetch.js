@@ -7,17 +7,13 @@ import useResetDelay from "./reset-delay";
 
 const useLazyFetch = (...args) => {
 	const {
-		isFetching,
-		isFetched,
-		body,
-		headers,
-		error,
 		timerSignal,
 		onTimerReset,
 		onStartFetch,
 		onFetchResults,
 		onFetchFail,
-		onResetResults
+		onResetResults,
+		...reqState
 	} = useRequestState();
 
 	let { url, resetDelay, refreshInterval, ...opts } = parseArguments(args);
@@ -48,11 +44,7 @@ const useLazyFetch = (...args) => {
 	useRefreshInterval({ timerSignal, refreshInterval, fetchFn });
 
 	return {
-		isFetching,
-		isFetched,
-		body,
-		headers,
-		error,
+		...reqState,
 		fetch: fetchFn
 	};
 };

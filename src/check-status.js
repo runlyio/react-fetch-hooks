@@ -38,6 +38,7 @@ async function parseJSONError(response) {
 function pojoResponse(response, body) {
 	return {
 		status: response.status,
+		statusText: response.statusText,
 		headers: pojoHeaders(response.headers),
 		type: response.type,
 		url: response.url,

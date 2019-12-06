@@ -8,25 +8,33 @@ const useRequestInitialState = () => {
 					return { ...state, timerSignal: 0 };
 
 				case "start-fetch": {
-					// clear the body, but only when refetching after error
+					// clear the results, but only when refetching after error
 					const body = !state.error ? state.body : null;
+					const headers = !state.error ? state.headers : null;
+					const status = !state.error ? state.status : null;
+					const statusText = !state.error ? state.statusText : null;
 
 					return {
 						...state,
 						timerSignal: 0,
 						isFetching: true,
 						error: null,
-						body
+						body,
+						headers,
+						status,
+						statusText
 					};
 				}
 
 				case "results": {
-					const { headers, body, timer } = action.payload;
+					const { headers, body, status, statusText, timer } = action.payload;
 
 					let results = {
 						...state,
 						body,
 						headers,
+						status,
+						statusText,
 						isFetching: false,
 						isFetched: true,
 						error: null
@@ -45,7 +53,9 @@ const useRequestInitialState = () => {
 						isFetching: false,
 						error: action.payload,
 						headers: action.payload?.response?.headers,
-						body: action.payload?.response?.body
+						body: action.payload?.response?.body,
+						status: action.payload?.response?.status,
+						statusText: action.payload?.response?.statusText
 					};
 
 				case "reset":
@@ -55,6 +65,8 @@ const useRequestInitialState = () => {
 						isFetched: false,
 						body: null,
 						headers: null,
+						status: null,
+						statusText: null,
 						error: null
 					};
 
@@ -67,6 +79,8 @@ const useRequestInitialState = () => {
 			isFetched: false,
 			body: null,
 			headers: null,
+			status: null,
+			statusText: null,
 			error: null,
 			timerSignal: 0
 		}

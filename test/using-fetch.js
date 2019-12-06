@@ -35,13 +35,24 @@ describe("Using fetch hook", function() {
 		it("should indicate the body is fetching", function() {
 			expect(this.result.current).to.be.ok;
 
-			const { isFetching, isFetched, error, body } = this.result.current;
+			const {
+				isFetching,
+				isFetched,
+				error,
+				body,
+				status,
+				statusText,
+				headers
+			} = this.result.current;
 
 			expect(isFetching).to.be.true;
 			expect(isFetched).to.be.false;
 			expect(error).to.not.be.ok;
 
 			expect(body).to.not.be.ok;
+			expect(status).to.not.be.ok;
+			expect(statusText).to.not.be.ok;
+			expect(headers).to.not.be.ok;
 		});
 
 		describe("with a successful server response", function() {
@@ -73,14 +84,14 @@ describe("Using fetch hook", function() {
 				expect(body[1]).to.equal("green banana");
 			});
 
-			it("should return with headers and body", function() {
-				const current = this.result.current;
+			it("should return with headers and status", function() {
+				const { headers, status, statusText } = this.result.current;
 
-				expect(current.headers).to.exist;
-				expect(current.body).to.exist;
-				expect(current.headers).to.deep.equal({
+				expect(headers).to.deep.equal({
 					"Content-Type": "application/json"
 				});
+				expect(status).to.equal(200);
+				expect(statusText).to.equal("OK");
 			});
 
 			describe("and then setting setting arbitrary props on the component", function() {
@@ -100,7 +111,7 @@ describe("Using fetch hook", function() {
 			beforeEach(function(done) {
 				this.requests.pop().resolve({
 					status: 500,
-					statusText: "OK",
+					statusText: "WTF",
 					headers: {
 						"Content-Type": "application/json"
 					},
@@ -135,6 +146,13 @@ describe("Using fetch hook", function() {
 				expect(headers).to.deep.equal({
 					"Content-Type": "application/json"
 				});
+			});
+
+			it("should return status", function() {
+				const { status, statusText } = this.result.current;
+
+				expect(status).to.equal(500);
+				expect(statusText).to.equal("WTF");
 			});
 
 			it("should return body", function() {
@@ -183,13 +201,24 @@ describe("Using fetch hook", function() {
 		it("should return results as fetching", function() {
 			expect(this.result.current).to.be.ok;
 
-			const { isFetching, isFetched, error, body } = this.result.current;
+			const {
+				isFetching,
+				isFetched,
+				error,
+				body,
+				status,
+				statusText,
+				headers
+			} = this.result.current;
 
 			expect(isFetching).to.be.true;
 			expect(isFetched).to.be.false;
 			expect(error).to.not.be.ok;
 
 			expect(body).to.not.be.ok;
+			expect(status).to.not.be.ok;
+			expect(statusText).to.not.be.ok;
+			expect(headers).to.not.be.ok;
 		});
 
 		describe("with a successful server response", function() {
@@ -197,6 +226,9 @@ describe("Using fetch hook", function() {
 				this.requests.pop().resolve({
 					status: 200,
 					statusText: "OK",
+					headers: {
+						"X-Answer-To-Universe": 42
+					},
 					json: async () => ["ripe banana", "green banana"]
 				});
 
@@ -216,6 +248,18 @@ describe("Using fetch hook", function() {
 				expect(body).to.have.lengthOf(2);
 				expect(body[0]).to.equal("ripe banana");
 				expect(body[1]).to.equal("green banana");
+			});
+
+			it("should return headers & status", function() {
+				expect(this.result.current).to.be.ok;
+
+				const { headers, status, statusText } = this.result.current;
+
+				expect(headers).to.deep.equal({
+					"X-Answer-To-Universe": 42
+				});
+				expect(status).to.equal(200);
+				expect(statusText).to.equal("OK");
 			});
 
 			describe("and then setting a keyed prop on the component", function() {
@@ -247,11 +291,26 @@ describe("Using fetch hook", function() {
 					expect(body[1]).to.equal("green banana");
 				});
 
+				it("should return previously loaded headers & status", function() {
+					expect(this.result.current).to.be.ok;
+
+					const { headers, status, statusText } = this.result.current;
+
+					expect(headers).to.deep.equal({
+						"X-Answer-To-Universe": 42
+					});
+					expect(status).to.equal(200);
+					expect(statusText).to.equal("OK");
+				});
+
 				describe("with another successful server response", function() {
 					beforeEach(function(done) {
 						this.requests.pop().resolve({
-							status: 200,
-							statusText: "OK",
+							status: 202,
+							statusText: "Accepted",
+							headers: {
+								"X-Server": "me"
+							},
 							json: async () => ["purple banana", "orange banana"]
 						});
 
@@ -271,6 +330,18 @@ describe("Using fetch hook", function() {
 						expect(body).to.have.lengthOf(2);
 						expect(body[0]).to.equal("purple banana");
 						expect(body[1]).to.equal("orange banana");
+					});
+
+					it("should return headers & status", function() {
+						expect(this.result.current).to.be.ok;
+
+						const { headers, status, statusText } = this.result.current;
+
+						expect(headers).to.deep.equal({
+							"X-Server": "me"
+						});
+						expect(status).to.equal(202);
+						expect(statusText).to.equal("Accepted");
 					});
 				});
 			});
@@ -292,7 +363,10 @@ describe("Using fetch hook", function() {
 			beforeEach(function(done) {
 				this.requests.pop().resolve({
 					status: 500,
-					statusText: "OK",
+					statusText: "Oh Shit",
+					headers: {
+						"X-Answer-To-Universe": 42
+					},
 					json: async () => ({
 						message: "Not today, buddy"
 					})
@@ -319,6 +393,18 @@ describe("Using fetch hook", function() {
 				expect(body).to.deep.equal({
 					message: "Not today, buddy"
 				});
+			});
+
+			it("should return headers & status", function() {
+				expect(this.result.current).to.be.ok;
+
+				const { headers, status, statusText } = this.result.current;
+
+				expect(headers).to.deep.equal({
+					"X-Answer-To-Universe": 42
+				});
+				expect(status).to.equal(500);
+				expect(statusText).to.equal("Oh Shit");
 			});
 
 			describe("and then setting a keyed prop on the component", function() {
@@ -351,6 +437,16 @@ describe("Using fetch hook", function() {
 					const { body } = this.result.current;
 
 					expect(body).to.not.be.ok;
+				});
+
+				it("should clear out error headers & status", function() {
+					expect(this.result.current).to.be.ok;
+
+					const { headers, status, statusText } = this.result.current;
+
+					expect(headers).to.not.be.ok;
+					expect(status).to.not.be.ok;
+					expect(statusText).to.not.be.ok;
 				});
 			});
 
@@ -549,7 +645,7 @@ describe("Using fetch hook", function() {
 		});
 	});
 
-	describe("when rendering a component that returns a 204", function() {
+	describe("when rendering a component that returns a 204 and no headers", function() {
 		beforeEach(function(done) {
 			const r = renderHook(() => useFetch(`http://example.com/api/bananas/`));
 			this.result = r.result;
@@ -576,6 +672,16 @@ describe("Using fetch hook", function() {
 			expect(error).to.not.be.ok;
 			expect(body).to.not.be.ok;
 		});
+
+		it("should return empty headers & status", function() {
+			expect(this.result.current).to.be.ok;
+
+			const { headers, status, statusText } = this.result.current;
+
+			expect(headers).to.not.be.ok;
+			expect(status).to.equal(204);
+			expect(statusText).to.equal("No Content");
+		});
 	});
 
 	describe("when rendering a component with a lazy function", function() {
@@ -601,7 +707,16 @@ describe("Using fetch hook", function() {
 		it("should return lazy function and fetch results", function() {
 			expect(this.result.current).to.be.ok;
 
-			const { fetch, isFetching, isFetched, error, body } = this.result.current;
+			const {
+				fetch,
+				isFetching,
+				isFetched,
+				error,
+				body,
+				headers,
+				status,
+				statusText
+			} = this.result.current;
 
 			expect(fetch).to.be.ok;
 			expect(fetch).to.be.a("function");
@@ -611,6 +726,9 @@ describe("Using fetch hook", function() {
 			expect(error).to.not.be.ok;
 
 			expect(body).to.not.be.ok;
+			expect(headers).to.not.be.ok;
+			expect(status).to.not.be.ok;
+			expect(statusText).to.not.be.ok;
 		});
 
 		describe("and then invoking the lazy function", function() {
@@ -633,13 +751,24 @@ describe("Using fetch hook", function() {
 			it("should return fetch results", function() {
 				expect(this.result.current).to.be.ok;
 
-				const { isFetching, isFetched, error, body } = this.result.current;
+				const {
+					isFetching,
+					isFetched,
+					error,
+					body,
+					headers,
+					status,
+					statusText
+				} = this.result.current;
 
 				expect(isFetching).to.be.true;
 				expect(isFetched).to.be.false;
 				expect(error).to.not.be.ok;
 
 				expect(body).to.not.be.ok;
+				expect(headers).to.not.be.ok;
+				expect(status).to.not.be.ok;
+				expect(statusText).to.not.be.ok;
 			});
 		});
 
@@ -743,12 +872,24 @@ describe("Using fetch hook", function() {
 				expect(body).to.deep.equal({ name: "Bob" });
 			});
 
+			it("should return headers & status", function() {
+				expect(this.result.current).to.be.ok;
+
+				const { headers, status, statusText } = this.result.current;
+
+				expect(headers).to.deep.equal({
+					"Content-Type": "application/json"
+				});
+				expect(status).to.equal(200);
+				expect(statusText).to.equal("OK");
+			});
+
 			describe("and then waiting the reset threshold time", function() {
 				beforeEach(function(done) {
 					setTimeout(done, 110);
 				});
 
-				it("should clear result body and headers", function() {
+				it("should clear result body, headers, & status", function() {
 					expect(this.result.current).to.be.ok;
 
 					const {
@@ -756,7 +897,9 @@ describe("Using fetch hook", function() {
 						isFetched,
 						error,
 						body,
-						headers
+						headers,
+						status,
+						statusText
 					} = this.result.current;
 
 					expect(isFetching).to.be.false;
@@ -765,6 +908,8 @@ describe("Using fetch hook", function() {
 
 					expect(body).to.not.be.ok;
 					expect(headers).to.not.be.ok;
+					expect(status).to.not.be.ok;
+					expect(statusText).to.not.be.ok;
 				});
 			});
 
@@ -779,13 +924,22 @@ describe("Using fetch hook", function() {
 				it("should mark status as refetching", function() {
 					expect(this.result.current).to.be.ok;
 
-					const { isFetching, isFetched, error, body } = this.result.current;
+					const { isFetching, isFetched, error } = this.result.current;
 
 					expect(isFetching).to.be.true;
 					expect(isFetched).to.be.true;
 					expect(error).to.not.be.ok;
+				});
+
+				it("should not reset body, headers, & status yet", function() {
+					const { body, headers, status, statusText } = this.result.current;
 
 					expect(body).to.deep.equal({ name: "Bob" });
+					expect(headers).to.deep.equal({
+						"Content-Type": "application/json"
+					});
+					expect(status).to.equal(200);
+					expect(statusText).to.equal("OK");
 				});
 
 				describe("and then waiting enough time for the original reset", function() {
@@ -793,40 +947,69 @@ describe("Using fetch hook", function() {
 						setTimeout(done, 60);
 					});
 
-					it("should not reset body", function() {
+					it("should not reset body, headers, & status", function() {
 						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, body } = this.result.current;
+						const {
+							isFetching,
+							isFetched,
+							error,
+							body,
+							headers,
+							status,
+							statusText
+						} = this.result.current;
 
 						expect(isFetching).to.be.true;
 						expect(isFetched).to.be.true;
 						expect(error).to.not.be.ok;
 
 						expect(body).to.deep.equal({ name: "Bob" });
+						expect(headers).to.deep.equal({
+							"Content-Type": "application/json"
+						});
+						expect(status).to.equal(200);
+						expect(statusText).to.equal("OK");
 					});
 				});
 
 				describe("and then receiving body and waiting past the original reset time", function() {
 					beforeEach(function(done) {
 						this.requests.pop().resolve({
-							status: 200,
-							statusText: "OK",
+							status: 202,
+							statusText: "Accepted",
+							headers: {
+								"X-Server": "wtf"
+							},
 							json: async () => ({ name: "Homer" })
 						});
 
 						setTimeout(done, 60);
 					});
 
-					it("should not reset body", function() {
+					it("should return new body, headers, & status", function() {
 						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, body } = this.result.current;
+						const {
+							isFetching,
+							isFetched,
+							error,
+							body,
+							headers,
+							status,
+							statusText
+						} = this.result.current;
 
 						expect(isFetching).to.be.false;
 						expect(isFetched).to.be.true;
 						expect(error).to.not.be.ok;
 
 						expect(body).to.deep.equal({ name: "Homer" });
+						expect(headers).to.deep.equal({
+							"X-Server": "wtf"
+						});
+						expect(status).to.equal(202);
+						expect(statusText).to.equal("Accepted");
 					});
 
 					describe("and then waiting for the next reset threshold time", function() {
@@ -834,14 +1017,17 @@ describe("Using fetch hook", function() {
 							setTimeout(done, 110);
 						});
 
-						it("should clear the result body", function() {
+						it("should clear the result body, headers, & status", function() {
 							expect(this.result.current).to.be.ok;
 
 							const {
 								isFetching,
 								isFetched,
 								error,
-								body
+								body,
+								headers,
+								status,
+								statusText
 							} = this.result.current;
 
 							expect(isFetching).to.be.false;
@@ -849,6 +1035,9 @@ describe("Using fetch hook", function() {
 							expect(error).to.not.be.ok;
 
 							expect(body).to.not.be.ok;
+							expect(headers).to.not.be.ok;
+							expect(status).to.not.be.ok;
+							expect(statusText).to.not.be.ok;
 						});
 					});
 				});
@@ -895,6 +1084,9 @@ describe("Using fetch hook", function() {
 					this.requests.pop().resolve({
 						status: 200,
 						statusText: "OK",
+						headers: {
+							"X-Server": "me"
+						},
 						json: async () => ({ color: "Yellow" })
 					});
 
@@ -913,21 +1105,44 @@ describe("Using fetch hook", function() {
 					expect(body).to.deep.equal({ color: "Yellow" });
 				});
 
+				it("should return headers & status", function() {
+					expect(this.result.current).to.be.ok;
+
+					const { headers, status, statusText } = this.result.current;
+
+					expect(headers).to.deep.equal({
+						"X-Server": "me"
+					});
+					expect(status).to.equal(200);
+					expect(statusText).to.equal("OK");
+				});
+
 				describe("and then waiting the refresh threshold time", function() {
 					beforeEach(function(done) {
 						setTimeout(done, 100);
 					});
 
-					it("should mark body as loading without clearing body", function() {
+					it("should mark as loading without clearing body", function() {
 						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, body } = this.result.current;
+						const { isFetching, isFetched, error } = this.result.current;
 
 						expect(isFetching).to.be.true;
 						expect(isFetched).to.be.true;
 						expect(error).to.not.be.ok;
+					});
+
+					it("should not reset body, headers, or status", function() {
+						expect(this.result.current).to.be.ok;
+
+						const { body, headers, status, statusText } = this.result.current;
 
 						expect(body).to.deep.equal({ color: "Yellow" });
+						expect(headers).to.deep.equal({
+							"X-Server": "me"
+						});
+						expect(status).to.equal(200);
+						expect(statusText).to.equal("OK");
 					});
 				});
 
@@ -942,41 +1157,61 @@ describe("Using fetch hook", function() {
 					it("should mark status as refetching", function() {
 						expect(this.result.current).to.be.ok;
 
-						const { isFetching, isFetched, error, body } = this.result.current;
+						const { isFetching, isFetched, error } = this.result.current;
 
 						expect(isFetching).to.be.true;
 						expect(isFetched).to.be.true;
 						expect(error).to.not.be.ok;
+					});
+
+					it("should not reset body, headers, or status", function() {
+						expect(this.result.current).to.be.ok;
+
+						const { body, headers, status, statusText } = this.result.current;
 
 						expect(body).to.deep.equal({ color: "Yellow" });
+						expect(headers).to.deep.equal({
+							"X-Server": "me"
+						});
+						expect(status).to.equal(200);
+						expect(statusText).to.equal("OK");
 					});
 
 					describe("and then waiting enough time for the original refresh", function() {
 						beforeEach(function(done) {
 							this.requests.pop().resolve({
-								status: 200,
-								statusText: "OK",
+								status: 202,
+								statusText: "Accepted",
+								headers: {
+									"X-Server": "you"
+								},
 								json: async () => ({ color: "Brown" })
 							});
 
 							setTimeout(done, 80);
 						});
 
-						it("should not refresh body", function() {
+						it("should not mark as fetching", function() {
 							expect(this.result.current).to.be.ok;
 
-							const {
-								isFetching,
-								isFetched,
-								error,
-								body
-							} = this.result.current;
+							const { isFetching, isFetched, error } = this.result.current;
 
 							expect(isFetching).to.be.false;
 							expect(isFetched).to.be.true;
 							expect(error).to.not.be.ok;
+						});
+
+						it("should load new body, headers, & status", function() {
+							expect(this.result.current).to.be.ok;
+
+							const { body, headers, status, statusText } = this.result.current;
 
 							expect(body).to.deep.equal({ color: "Brown" });
+							expect(headers).to.deep.equal({
+								"X-Server": "you"
+							});
+							expect(status).to.equal(202);
+							expect(statusText).to.equal("Accepted");
 						});
 
 						describe("and then waiting for the next refresh time", function() {
@@ -987,18 +1222,29 @@ describe("Using fetch hook", function() {
 							it("should refresh the body", function() {
 								expect(this.result.current).to.be.ok;
 
-								const {
-									isFetching,
-									isFetched,
-									error,
-									body
-								} = this.result.current;
+								const { isFetching, isFetched, error } = this.result.current;
 
 								expect(isFetching).to.be.true;
 								expect(isFetched).to.be.true;
 								expect(error).to.not.be.ok;
+							});
+
+							it("should not reset body, headers, or status", function() {
+								expect(this.result.current).to.be.ok;
+
+								const {
+									body,
+									headers,
+									status,
+									statusText
+								} = this.result.current;
 
 								expect(body).to.deep.equal({ color: "Brown" });
+								expect(headers).to.deep.equal({
+									"X-Server": "you"
+								});
+								expect(status).to.equal(202);
+								expect(statusText).to.equal("Accepted");
 							});
 						});
 					});
